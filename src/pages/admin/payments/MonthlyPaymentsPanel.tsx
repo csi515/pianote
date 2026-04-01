@@ -224,8 +224,9 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
             <Stack
                 direction="row"
                 alignItems="center"
+                justifyContent="center"
                 spacing={1}
-                sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
+                sx={{ mb: 2, flexWrap: 'wrap', gap: 1, width: '100%' }}
             >
                 <IconButton
                     type="button"

@@ -34,7 +34,7 @@ export const AdminTableSurface: React.FC<AdminTableSurfaceProps> = ({ children, 
     <TableContainer
         component={Paper}
         variant="outlined"
-        sx={{ ...tableContainerTouchScrollSx, ...sx }}
+        sx={[tableContainerTouchScrollSx, sx] as SxProps<Theme>}
     >
         {children}
     </TableContainer>
