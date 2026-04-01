@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Safari pinned tab: и… диг -->
+  <path fill="#000" d="M4 8c0-2.2 1.8-4 4-4h16c2.2 0 4 1.8 4 4v16c0 2.2-1.8 4-4 4H8c-2.2 0-4-1.8-4-4V8zm6 2h3v14h-3V10zm5 0h3v9h-3v-9zm5 0h3v14h-3V10z"/>
+  <circle cx="22" cy="22" r="3" fill="#000"/>
+  <path fill="#000" d="M24 10v10h2V10h-2z"/>
+</svg>

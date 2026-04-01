@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  /* PiaNote — 따뜻한 블루그레이 + 코랄 악센트 (MUI theme과 동기화) */
+  --color-primary: #4A6B8A;
+  --color-primary-light: #6E8EAC;
+  --color-primary-dark: #354A63;
+
+  --color-background: #FAF7F2;
+  --color-background-secondary: #FFF;
+
+  --color-accent: #E89888;
+  --color-accent-light: #F4C4BA;
+  --color-accent-dark: #C96B5C;
+
+  --color-success: #43A047;
+  --color-warning: #F5A623;
+  --color-error: #E53935;
+  --color-info: #29B6F6;
+
+  /* 텍스트 색상 */
+  --color-text-primary: #2C3540;
+  --color-text-secondary: #5C6670;
+  --color-text-disabled: #9AA3AD;
+
+  /* 폰트 패밀리 */
+  --font-sans: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* 폰트 크기 */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+
+  /* Border Radius - 부드러운 앱 스타일 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* 간격 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+}
+
+/* 글로벌 스타일 */
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+
+  body {
+    @apply bg-background text-text-primary;
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+
+  #root {
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold;
+  }
+
+  /* 풀스크린 레이아웃 지원 */
+  .fullscreen-layout {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+}
+
+/* 유틸리티 클래스 */
+@layer utilities {
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .card-rounded {
+    border-radius: var(--radius-lg);
+  }
+
+  .polaroid-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    padding-bottom: 3rem;
+    box-shadow: var(--shadow-lg);
+    transform: rotate(-2deg);
+    transition: transform 0.3s ease;
+  }
+
+  .polaroid-card:hover {
+    transform: rotate(0deg) scale(1.05);
+  }
+}
