@@ -6,6 +6,7 @@ import { PlatformAdminProvider } from '@/contexts/PlatformAdminContext';
 import { theme } from '@/theme/mui-theme';
 import { isSupabaseConfigured } from '@/lib/env';
 import ConfigMissingScreen from '@/components/system/ConfigMissingScreen';
+import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
 import { AppRoutes } from '@/app/AppRoutes';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <SnackbarProvider maxSnack={3}>
+        <PwaInstallPrompt />
         <AuthProvider>
           <PlatformAdminProvider>
             <AppRoutes />

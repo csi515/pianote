@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Paper, Grid, Container, Alert, Tooltip, Button } from '@mui/material';
+import { Typography, Paper, Grid, Container, Alert, Tooltip } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import WarningIcon from '@mui/icons-material/Warning';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTopBar } from '@/contexts/PageTopBarContext';
-import { ROUTES } from '@/constants/routes';
 import { getAcademyAdminMetrics } from '@/services/academyAdminMetrics.service';
 import { ui } from '@/i18n/ui';
 
@@ -61,49 +59,6 @@ const AdminDashboard: React.FC = () => {
 
     return (
         <Container maxWidth="lg" component="main" sx={{ py: { xs: 2, sm: 3 } }}>
-            {!loading && stats.overduePayments > 0 && (
-                <Alert
-                    severity="warning"
-                    role="status"
-                    aria-live="polite"
-                    sx={{ mb: 2 }}
-                    action={
-                        <Button
-                            color="inherit"
-                            size="small"
-                            component={RouterLink}
-                            to={ROUTES.admin.payments}
-                        >
-                            {d.pastDueUnpaidGoPayments}
-                        </Button>
-                    }
-                >
-                    {d.pastDueUnpaidAlert.replace('{count}', String(stats.overduePayments))}
-                </Alert>
-            )}
-            {!loading && stats.textbookFeeUnpaidStudents > 0 && (
-                <Alert
-                    severity="warning"
-                    role="status"
-                    aria-live="polite"
-                    sx={{ mb: 2 }}
-                    action={
-                        <Button
-                            color="inherit"
-                            size="small"
-                            component={RouterLink}
-                            to={ROUTES.admin.students}
-                        >
-                            {d.textbookFeeUnpaidGoStudents}
-                        </Button>
-                    }
-                >
-                    {d.textbookFeeUnpaidAlert.replace(
-                        '{count}',
-                        String(stats.textbookFeeUnpaidStudents)
-                    )}
-                </Alert>
-            )}
             <Grid container spacing={{ xs: 2, sm: 2.5 }}>
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                     <Paper sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 2, textAlign: 'center' }}>

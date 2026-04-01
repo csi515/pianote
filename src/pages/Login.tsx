@@ -138,9 +138,6 @@ const Login: React.FC = () => {
                         >
                             {ui.auth.loginScreen.brandTitle}
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            {ui.auth.loginScreen.tagline}
-                        </Typography>
                     </Box>
 
                     <Tabs

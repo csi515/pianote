@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import {
     Box,
+    Typography,
     Button,
     Container,
     Paper,
@@ -52,15 +53,30 @@ import { ui } from '@/i18n/ui';
 import MonthlyPaymentsPanel from '@/pages/admin/payments/MonthlyPaymentsPanel';
 import { PaymentPaidDateCell } from '@/pages/admin/payments/PaymentPaidDateCell';
 import { TableEmptyRow, TableLoadingRow } from '@/components/common/PageState';
+import {
+    MobileCardList,
+    MobileCardListItem,
+    MobileStackedCard,
+} from '@/components/common/adminTable';
 import { tablePaginationTouchSx, touchButtonSx } from '@/constants/touch';
 
 type PayStatus = Database['public']['Tables']['payments']['Row']['status'];
 
+function PaymentsInfoRow ({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <Stack direction="row" spacing={1} alignItems="flex-start" flexWrap="wrap">
+            <Typography component="span" variant="caption" color="text.secondary" sx={{ minWidth: 72 }}>
+                {label}
+            </Typography>
+            <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
+        </Stack>
+    );
+}
+
 const PaymentsManagement: React.FC = () => {
     const paymentDialogTitleId = useId();
     const theme = useTheme();
-    const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
-    const isXs = !isSmUp;
+    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
 
     const { academy } = useAuth();
     usePageTopBar({ title: ui.adminPayments.title, backTo: ROUTES.admin.dashboard });
@@ -269,101 +285,176 @@ const PaymentsManagement: React.FC = () => {
                             {ui.adminPayments.emptyAllListHint}
                         </Alert>
                     ) : null}
-                    <TableContainer component={Paper} variant="outlined">
-                        <Table size="small" aria-label={ui.adminPayments.tableAriaLabelAll}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>{ui.adminPayments.student}</TableCell>
-                                    <TableCell align="right">{ui.adminPayments.amount}</TableCell>
-                                    {!isXs ? (
-                                        <>
-                                            <TableCell>{ui.adminPayments.dueDate}</TableCell>
-                                            <TableCell>{ui.adminPayments.paidDate}</TableCell>
-                                        </>
-                                    ) : null}
-                                    <TableCell sx={{ minWidth: 160 }}>{ui.adminPayments.membershipPaidColumn}</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
+                    {isMobileList ? (
+                        <Paper variant="outlined">
+                            <Box sx={{ p: 2 }}>
                                 {loading ? (
-                                    <TableLoadingRow colSpan={isXs ? 3 : 5} message={ui.common.loading} />
+                                    <Typography color="text.secondary" textAlign="center" py={3}>
+                                        {ui.common.loading}
+                                    </Typography>
                                 ) : rowsAll.length === 0 ? (
-                                    <TableEmptyRow colSpan={isXs ? 3 : 5} message={ui.adminPayments.emptyAllList} />
+                                    <Typography color="text.secondary" textAlign="center" py={3}>
+                                        {ui.adminPayments.emptyAllList}
+                                    </Typography>
                                 ) : (
-                                    rowsAll.map((r) => (
-                                        <TableRow key={r.id}>
-                                            <TableCell>{r.student_name}</TableCell>
-                                            <TableCell align="right">{r.amount.toLocaleString()}</TableCell>
-                                            {!isXs ? (
-                                                <>
-                                                    <TableCell>{r.due_date}</TableCell>
-                                                    <TableCell>
-                                                        <PaymentPaidDateCell
-                                                            row={r}
-                                                            disabled={togglingPaymentId === r.id}
-                                                            onPaidDateCommit={commitPaidDateAll}
-                                                        />
-                                                    </TableCell>
-                                                </>
-                                            ) : null}
-                                            <TableCell sx={{ minWidth: 160 }}>
-                                                <Stack
-                                                    direction={{ xs: 'column', sm: 'row' }}
-                                                    alignItems={{ xs: 'flex-start', sm: 'center' }}
-                                                    spacing={1}
-                                                    flexWrap="wrap"
+                                    <MobileCardList>
+                                        {rowsAll.map((r) => (
+                                            <MobileCardListItem key={r.id}>
+                                                <MobileStackedCard
+                                                    actions={
+                                                        <Stack
+                                                            direction="row"
+                                                            alignItems="center"
+                                                            flexWrap="wrap"
+                                                            gap={1}
+                                                            sx={{ width: '100%', justifyContent: 'flex-start' }}
+                                                        >
+                                                            <Switch
+                                                                checked={r.status === 'paid'}
+                                                                disabled={togglingPaymentId === r.id}
+                                                                onChange={(_, checked) =>
+                                                                    void toggleMembershipPaidAll(r, checked)
+                                                                }
+                                                                inputProps={{
+                                                                    'aria-label':
+                                                                        ui.adminPayments.membershipPaidToggleAria,
+                                                                }}
+                                                            />
+                                                            {r.status === 'overdue' ? (
+                                                                <Chip
+                                                                    size="small"
+                                                                    color="error"
+                                                                    label={ui.adminPayments.statusOpt.overdue}
+                                                                />
+                                                            ) : null}
+                                                        </Stack>
+                                                    }
                                                 >
-                                                    <Switch
-                                                        checked={r.status === 'paid'}
-                                                        disabled={togglingPaymentId === r.id}
-                                                        onChange={(_, checked) =>
-                                                            void toggleMembershipPaidAll(r, checked)
-                                                        }
-                                                        inputProps={{
-                                                            'aria-label':
-                                                                ui.adminPayments.membershipPaidToggleAria,
-                                                        }}
-                                                    />
-                                                    {isXs && r.status === 'paid' ? (
-                                                        <PaymentPaidDateCell
-                                                            row={r}
-                                                            disabled={togglingPaymentId === r.id}
-                                                            onPaidDateCommit={commitPaidDateAll}
-                                                            compactBelow
-                                                        />
-                                                    ) : null}
-                                                    {r.status === 'overdue' ? (
-                                                        <Chip
-                                                            size="small"
-                                                            color="error"
-                                                            label={ui.adminPayments.statusOpt.overdue}
-                                                        />
-                                                    ) : null}
-                                                </Stack>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
+                                                    <Stack spacing={1.25}>
+                                                        <Typography variant="subtitle1" fontWeight={600} component="h3">
+                                                            {r.student_name}
+                                                        </Typography>
+                                                        <PaymentsInfoRow label={ui.adminPayments.amount}>
+                                                            <Typography variant="body2">
+                                                                {r.amount.toLocaleString()}
+                                                            </Typography>
+                                                        </PaymentsInfoRow>
+                                                        <PaymentsInfoRow label={ui.adminPayments.dueDate}>
+                                                            <Typography variant="body2">{r.due_date}</Typography>
+                                                        </PaymentsInfoRow>
+                                                        <PaymentsInfoRow label={ui.adminPayments.paidDate}>
+                                                            <PaymentPaidDateCell
+                                                                row={r}
+                                                                disabled={togglingPaymentId === r.id}
+                                                                onPaidDateCommit={commitPaidDateAll}
+                                                            />
+                                                        </PaymentsInfoRow>
+                                                    </Stack>
+                                                </MobileStackedCard>
+                                            </MobileCardListItem>
+                                        ))}
+                                    </MobileCardList>
                                 )}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            component="div"
-                            count={totalAll}
-                            page={pageAll}
-                            onPageChange={(_, p) => setPageAll(p)}
-                            rowsPerPage={rowsPerPageAll}
-                            onRowsPerPageChange={(e) => {
-                                setRowsPerPageAll(parseInt(e.target.value, 10));
-                                setPageAll(0);
-                            }}
-                            rowsPerPageOptions={[5, 10, 25, 50]}
-                            labelRowsPerPage={ui.pagination.labelRowsPerPage}
-                            labelDisplayedRows={({ from, to, count }) =>
-                                count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
-                            }
-                            sx={tablePaginationTouchSx}
-                        />
-                    </TableContainer>
+                            </Box>
+                            <TablePagination
+                                component="div"
+                                count={totalAll}
+                                page={pageAll}
+                                onPageChange={(_, p) => setPageAll(p)}
+                                rowsPerPage={rowsPerPageAll}
+                                onRowsPerPageChange={(e) => {
+                                    setRowsPerPageAll(parseInt(e.target.value, 10));
+                                    setPageAll(0);
+                                }}
+                                rowsPerPageOptions={[5, 10, 25, 50]}
+                                labelRowsPerPage={ui.pagination.labelRowsPerPage}
+                                labelDisplayedRows={({ from, to, count }) =>
+                                    count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                }
+                                sx={tablePaginationTouchSx}
+                            />
+                        </Paper>
+                    ) : (
+                        <TableContainer component={Paper} variant="outlined">
+                            <Table size="small" aria-label={ui.adminPayments.tableAriaLabelAll}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>{ui.adminPayments.student}</TableCell>
+                                        <TableCell align="right">{ui.adminPayments.amount}</TableCell>
+                                        <TableCell>{ui.adminPayments.dueDate}</TableCell>
+                                        <TableCell>{ui.adminPayments.paidDate}</TableCell>
+                                        <TableCell sx={{ minWidth: 160 }}>{ui.adminPayments.membershipPaidColumn}</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {loading ? (
+                                        <TableLoadingRow colSpan={5} message={ui.common.loading} />
+                                    ) : rowsAll.length === 0 ? (
+                                        <TableEmptyRow colSpan={5} message={ui.adminPayments.emptyAllList} />
+                                    ) : (
+                                        rowsAll.map((r) => (
+                                            <TableRow key={r.id}>
+                                                <TableCell>{r.student_name}</TableCell>
+                                                <TableCell align="right">{r.amount.toLocaleString()}</TableCell>
+                                                <TableCell>{r.due_date}</TableCell>
+                                                <TableCell>
+                                                    <PaymentPaidDateCell
+                                                        row={r}
+                                                        disabled={togglingPaymentId === r.id}
+                                                        onPaidDateCommit={commitPaidDateAll}
+                                                    />
+                                                </TableCell>
+                                                <TableCell sx={{ minWidth: 160 }}>
+                                                    <Stack
+                                                        direction="row"
+                                                        alignItems="center"
+                                                        spacing={1}
+                                                        flexWrap="wrap"
+                                                    >
+                                                        <Switch
+                                                            checked={r.status === 'paid'}
+                                                            disabled={togglingPaymentId === r.id}
+                                                            onChange={(_, checked) =>
+                                                                void toggleMembershipPaidAll(r, checked)
+                                                            }
+                                                            inputProps={{
+                                                                'aria-label':
+                                                                    ui.adminPayments.membershipPaidToggleAria,
+                                                            }}
+                                                        />
+                                                        {r.status === 'overdue' ? (
+                                                            <Chip
+                                                                size="small"
+                                                                color="error"
+                                                                label={ui.adminPayments.statusOpt.overdue}
+                                                            />
+                                                        ) : null}
+                                                    </Stack>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                            <TablePagination
+                                component="div"
+                                count={totalAll}
+                                page={pageAll}
+                                onPageChange={(_, p) => setPageAll(p)}
+                                rowsPerPage={rowsPerPageAll}
+                                onRowsPerPageChange={(e) => {
+                                    setRowsPerPageAll(parseInt(e.target.value, 10));
+                                    setPageAll(0);
+                                }}
+                                rowsPerPageOptions={[5, 10, 25, 50]}
+                                labelRowsPerPage={ui.pagination.labelRowsPerPage}
+                                labelDisplayedRows={({ from, to, count }) =>
+                                    count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                }
+                                sx={tablePaginationTouchSx}
+                            />
+                        </TableContainer>
+                    )}
                 </>
             )}
 

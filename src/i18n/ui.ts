@@ -16,7 +16,6 @@ export const ui = {
         /** 로그인 화면(탭·폼) */
         loginScreen: {
             brandTitle: '🎹 PiaNote',
-            tagline: '학원 운영 (학생 전용 앱 없음)',
             tabLogin: '로그인',
             tabSignup: '학원 가입',
             emailLabel: '이메일',
@@ -116,6 +115,20 @@ export const ui = {
         /** API 오류 메시지가 없을 때 짧은 폴백 */
         errorShort: '실패',
     },
+    /** 모바일 웹에서 PWA(홈 화면 설치) 유도 */
+    pwaInstall: {
+        dialogTitle: 'PiaNote 앱으로 설치할까요?',
+        dialogBody:
+            '홈 화면에 추가하면 브라우저 주소창 없이 전체 화면으로 빠르게 실행할 수 있습니다.',
+        install: '설치',
+        later: '나중에',
+        iosTitle: '홈 화면에 추가',
+        iosBody:
+            'Safari 하단의 공유 버튼을 누른 뒤 「홈 화면에 추가」를 선택하세요.',
+        iosConfirm: '확인',
+        installUnavailable:
+            '브라우저 메뉴(⋮)에서 「앱 설치」 또는 「홈 화면에 추가」를 선택해 주세요.',
+    },
     pagination: {
         labelRowsPerPage: '페이지당 행',
     },
@@ -136,6 +149,16 @@ export const ui = {
         openMenuAria: '메뉴 열기',
         /** 사이드바 하단 로그아웃 */
         sidebarLogout: '로그아웃',
+        /** 모바일 하단 탭 — 짧은 라벨 */
+        mobileBottomNav: {
+            dashboard: '홈',
+            students: '학생',
+            payments: '결제',
+            textbooks: '교재',
+            settings: '설정',
+            platform: '본사',
+        },
+        mobileBottomNavAria: '주요 메뉴',
     },
     nav: {
         adminPayments: '결제 관리',
@@ -252,12 +275,6 @@ export const ui = {
         statTextbookFeeUnpaidHint: '보유 교재 중 납부 처리되지 않은 건이 있는 활성 학생',
         countUnit: '명',
         countUnitCases: '건',
-        pastDueUnpaidAlert:
-            '납부 예정일이 지난 미납 결제가 {count}건 있습니다. 결제 관리에서 확인하세요.',
-        pastDueUnpaidGoPayments: '결제 관리로 이동',
-        textbookFeeUnpaidAlert:
-            '보유 교재 중 교재비가 미납인 활성 학생이 {count}명 있습니다. 학생 관리에서 확인하세요.',
-        textbookFeeUnpaidGoStudents: '학생 관리로 이동',
         loadingEllipsis: '...',
     },
     adminPayments: {

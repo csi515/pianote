@@ -14,10 +14,10 @@ import {
     Menu,
     MenuItem,
     Tooltip,
-    TablePagination,
     Typography,
     useMediaQuery,
     useTheme,
+    Stack,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -27,7 +27,13 @@ import { ui } from '@/i18n/ui';
 import type { StudentWithParent } from '@/services/students.service';
 import type { StudentTextbookPaymentRowStatus } from '@/services/textbooks.service';
 import { TableEmptyRow, TableLoadingRow } from '@/components/common/PageState';
-import { MIN_TOUCH_TARGET_PX, tablePaginationTouchSx, touchIconButtonSx } from '@/constants/touch';
+import {
+    AdminTablePaginationBar,
+    MobileCardList,
+    MobileCardListItem,
+    MobileStackedCard,
+} from '@/components/common/adminTable';
+import { MIN_TOUCH_TARGET_PX, touchIconButtonSx } from '@/constants/touch';
 
 function memoPreviewText (memo: string | null | undefined): string {
     const t = memo?.trim();
@@ -50,6 +56,19 @@ interface StudentManagementTableProps {
     onAddStudent?: () => void;
 }
 
+function FieldRow ({ label, value }: { label: string; value: React.ReactNode }) {
+    return (
+        <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ flexWrap: 'wrap' }}>
+            <Typography component="span" variant="caption" color="text.secondary" sx={{ minWidth: 72 }}>
+                {label}
+            </Typography>
+            <Typography component="span" variant="body2" sx={{ flex: 1, minWidth: 0 }}>
+                {value}
+            </Typography>
+        </Stack>
+    );
+}
+
 export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
     students,
     textbookPaymentByStudent,
@@ -65,8 +84,7 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
     onAddStudent,
 }) => {
     const theme = useTheme();
-    const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
-    const isXs = !isSmUp;
+    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
     const [menuStudent, setMenuStudent] = useState<StudentWithParent | null>(null);
@@ -80,7 +98,8 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
         setMenuAnchor(null);
         setMenuStudent(null);
     };
-    const colSpan = isXs ? 5 : 9;
+
+    const colSpan = 9;
 
     /** 교재비 열: TEXTBOOK_FEES / TERMINOLOGY 와 같이 활성 학생만 none/paid/unpaid. 비활성은 집계 제외(—). */
     const renderTextbookFeeCell = (student: StudentWithParent) => {
@@ -131,6 +150,96 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
         );
     };
 
+    const renderMobileCard = (student: StudentWithParent) => (
+        <MobileCardListItem key={student.id}>
+            <MobileStackedCard
+                actions={
+                    <>
+                        <Tooltip title={ui.adminStudents.manage}>
+                            <IconButton
+                                size="small"
+                                aria-label={`${student.name} ${ui.adminStudents.manage}`}
+                                aria-haspopup="menu"
+                                aria-expanded={Boolean(menuAnchor) && menuStudent?.id === student.id}
+                                onClick={(e) => openStatusMenu(e, student)}
+                                sx={touchIconButtonSx}
+                            >
+                                <ManageAccountsIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={ui.adminStudents.editAria}>
+                            <IconButton
+                                size="small"
+                                aria-label={`${student.name} ${ui.adminStudents.editAria}`}
+                                onClick={() => onEdit(student)}
+                                sx={touchIconButtonSx}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <IconButton
+                            size="small"
+                            color="error"
+                            aria-label={`${student.name} ${ui.adminStudents.deleteAria}`}
+                            onClick={() => onDelete(student)}
+                            sx={touchIconButtonSx}
+                        >
+                            <DeleteIcon />
+                        </IconButton>
+                    </>
+                }
+            >
+                <Stack spacing={1.25}>
+                    <Typography variant="subtitle1" fontWeight={600} component="h3">
+                        {student.name}
+                    </Typography>
+                    <FieldRow
+                        label={ui.adminStudents.tableColGrade}
+                        value={student.grade?.trim() ? student.grade : '—'}
+                    />
+                    <FieldRow label={ui.adminStudents.tableColMemo} value={memoPreviewText(student.memo)} />
+                    <FieldRow
+                        label={ui.adminStudents.tableColParent}
+                        value={student.parent_phone?.trim() ? student.parent_phone : '—'}
+                    />
+                    <FieldRow label={ui.adminStudents.tableColEnrollment} value={student.enrollment_date} />
+                    <FieldRow
+                        label={ui.adminStudents.tableColLeftAcademy}
+                        value={student.left_academy_date?.trim() ? student.left_academy_date : '—'}
+                    />
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        <Typography variant="caption" color="text.secondary">
+                            {ui.adminStudents.tableColStatus}
+                        </Typography>
+                        {student.active ? (
+                            <Chip
+                                label={ui.adminStudents.chipActive}
+                                color="success"
+                                size="small"
+                                aria-label={`${student.name} ${ui.adminStudents.chipActive}`}
+                            />
+                        ) : (
+                            <Chip
+                                label={ui.adminStudents.chipInactive}
+                                color="default"
+                                size="small"
+                                aria-label={`${student.name} ${ui.adminStudents.chipInactive}`}
+                            />
+                        )}
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        <Tooltip title={ui.adminStudents.tableColTextbookFeeHint}>
+                            <Typography variant="caption" color="text.secondary" component="span">
+                                {ui.adminStudents.tableColTextbookFee}
+                            </Typography>
+                        </Tooltip>
+                        <Box component="span">{renderTextbookFeeCell(student)}</Box>
+                    </Stack>
+                </Stack>
+            </MobileStackedCard>
+        </MobileCardListItem>
+    );
+
     return (
         <Box sx={{ width: '100%' }}>
             {onAddStudent && (
@@ -158,157 +267,168 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                     overflow: 'hidden',
                 }}
             >
-                <TableContainer
-                    sx={{
-                        overflow: 'auto',
-                        WebkitOverflowScrolling: 'touch',
-                        maxHeight: { xs: 'min(70vh, 560px)', sm: 'none' },
-                    }}
-                >
-                    <Table
-                        stickyHeader={isXs}
-                        size="small"
-                        aria-label={ui.adminStudents.tableAriaLabel}
-                        sx={{
-                            minWidth: isXs ? 640 : undefined,
-                            '& .MuiTableCell-head': {
-                                backgroundColor: 'background.paper',
-                            },
-                        }}
-                    >
-                <TableHead>
-                    <TableRow>
-                        <TableCell>{ui.adminStudents.tableColName}</TableCell>
-                        <TableCell>{ui.adminStudents.tableColGrade}</TableCell>
-                        {!isXs ? (
-                            <>
-                                <TableCell sx={{ minWidth: 120, maxWidth: 280 }}>
-                                    {ui.adminStudents.tableColMemo}
-                                </TableCell>
-                                <TableCell>{ui.adminStudents.tableColParent}</TableCell>
-                                <TableCell>{ui.adminStudents.tableColEnrollment}</TableCell>
-                                <TableCell>{ui.adminStudents.tableColLeftAcademy}</TableCell>
-                            </>
-                        ) : null}
-                        <TableCell>{ui.adminStudents.tableColStatus}</TableCell>
-                        <TableCell>
-                            <Tooltip title={ui.adminStudents.tableColTextbookFeeHint}>
-                                <span>{ui.adminStudents.tableColTextbookFee}</span>
-                            </Tooltip>
-                        </TableCell>
-                        <TableCell align="right">{ui.adminStudents.tableColActions}</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {loading ? (
-                        <TableLoadingRow colSpan={colSpan} message={ui.common.loading} />
-                    ) : students.length === 0 ? (
-                        <TableEmptyRow colSpan={colSpan} message={ui.adminStudents.tableEmpty} />
-                    ) : (
-                        students.map((student) => (
-                            <TableRow key={student.id} hover>
-                                    <TableCell>{student.name}</TableCell>
-                                    <TableCell>{student.grade?.trim() ? student.grade : '—'}</TableCell>
-                                    {!isXs ? (
-                                        <>
-                                            <TableCell
-                                                sx={{
-                                                    maxWidth: { xs: 140, sm: 260 },
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    whiteSpace: 'nowrap',
-                                                }}
-                                                title={memoPreviewText(student.memo)}
-                                            >
-                                                {memoPreviewText(student.memo)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.parent_phone?.trim() ? student.parent_phone : '—'}
-                                            </TableCell>
-                                            <TableCell>{student.enrollment_date}</TableCell>
-                                            <TableCell>
-                                                {student.left_academy_date?.trim()
-                                                    ? student.left_academy_date
-                                                    : '—'}
-                                            </TableCell>
-                                        </>
-                                    ) : null}
-                                    <TableCell>
-                                        {student.active ? (
-                                            <Chip
-                                                label={ui.adminStudents.chipActive}
-                                                color="success"
-                                                size="small"
-                                                aria-label={`${student.name} ${ui.adminStudents.chipActive}`}
-                                            />
-                                        ) : (
-                                            <Chip
-                                                label={ui.adminStudents.chipInactive}
-                                                color="default"
-                                                size="small"
-                                                aria-label={`${student.name} ${ui.adminStudents.chipInactive}`}
-                                            />
-                                        )}
-                                    </TableCell>
-                                    <TableCell>{renderTextbookFeeCell(student)}</TableCell>
-                                    <TableCell align="right">
-                                        <Tooltip title={ui.adminStudents.manage}>
-                                            <IconButton
-                                                size="small"
-                                                aria-label={`${student.name} ${ui.adminStudents.manage}`}
-                                                aria-haspopup="menu"
-                                                aria-expanded={Boolean(menuAnchor) && menuStudent?.id === student.id}
-                                                onClick={(e) => openStatusMenu(e, student)}
-                                                sx={touchIconButtonSx}
-                                            >
-                                                <ManageAccountsIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        {!isXs ? (
-                                            <>
-                                                <IconButton
-                                                    size="small"
-                                                    aria-label={`${student.name} ${ui.adminStudents.editAria}`}
-                                                    onClick={() => onEdit(student)}
-                                                    sx={touchIconButtonSx}
+                {isMobileList ? (
+                    <>
+                        <Box sx={{ p: 2 }}>
+                            {loading ? (
+                                <Typography color="text.secondary" textAlign="center" py={3}>
+                                    {ui.common.loading}
+                                </Typography>
+                            ) : students.length === 0 ? (
+                                <Typography color="text.secondary" textAlign="center" py={3}>
+                                    {ui.adminStudents.tableEmpty}
+                                </Typography>
+                            ) : (
+                                <MobileCardList>{students.map(renderMobileCard)}</MobileCardList>
+                            )}
+                        </Box>
+                        <AdminTablePaginationBar
+                            count={totalCount}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
+                            onPageChange={onPageChange}
+                            onRowsPerPageChange={(n) => {
+                                onRowsPerPageChange(n);
+                                onPageChange(0);
+                            }}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <TableContainer
+                            sx={{
+                                overflow: 'auto',
+                                WebkitOverflowScrolling: 'touch',
+                            }}
+                        >
+                            <Table
+                                size="small"
+                                aria-label={ui.adminStudents.tableAriaLabel}
+                                sx={{
+                                    '& .MuiTableCell-head': {
+                                        backgroundColor: 'background.paper',
+                                    },
+                                }}
+                            >
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>{ui.adminStudents.tableColName}</TableCell>
+                                        <TableCell>{ui.adminStudents.tableColGrade}</TableCell>
+                                        <TableCell sx={{ minWidth: 120, maxWidth: 280 }}>
+                                            {ui.adminStudents.tableColMemo}
+                                        </TableCell>
+                                        <TableCell>{ui.adminStudents.tableColParent}</TableCell>
+                                        <TableCell>{ui.adminStudents.tableColEnrollment}</TableCell>
+                                        <TableCell>{ui.adminStudents.tableColLeftAcademy}</TableCell>
+                                        <TableCell>{ui.adminStudents.tableColStatus}</TableCell>
+                                        <TableCell>
+                                            <Tooltip title={ui.adminStudents.tableColTextbookFeeHint}>
+                                                <span>{ui.adminStudents.tableColTextbookFee}</span>
+                                            </Tooltip>
+                                        </TableCell>
+                                        <TableCell align="right">{ui.adminStudents.tableColActions}</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {loading ? (
+                                        <TableLoadingRow colSpan={colSpan} message={ui.common.loading} />
+                                    ) : students.length === 0 ? (
+                                        <TableEmptyRow colSpan={colSpan} message={ui.adminStudents.tableEmpty} />
+                                    ) : (
+                                        students.map((student) => (
+                                            <TableRow key={student.id} hover>
+                                                <TableCell>{student.name}</TableCell>
+                                                <TableCell>{student.grade?.trim() ? student.grade : '—'}</TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        maxWidth: 260,
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                    title={memoPreviewText(student.memo)}
                                                 >
-                                                    <EditIcon />
-                                                </IconButton>
-                                                <IconButton
-                                                    size="small"
-                                                    color="error"
-                                                    aria-label={`${student.name} ${ui.adminStudents.deleteAria}`}
-                                                    onClick={() => onDelete(student)}
-                                                    sx={touchIconButtonSx}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </>
-                                        ) : null}
-                                    </TableCell>
-                            </TableRow>
-                        ))
-                    )}
-                </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                component="div"
-                count={totalCount}
-                page={page}
-                onPageChange={(_, p) => onPageChange(p)}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={(e) => {
-                    onRowsPerPageChange(parseInt(e.target.value, 10));
-                    onPageChange(0);
-                }}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                labelRowsPerPage={ui.pagination.labelRowsPerPage}
-                labelDisplayedRows={({ from, to, count }) =>
-                    count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
-                }
-                sx={tablePaginationTouchSx}
-                />
+                                                    {memoPreviewText(student.memo)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.parent_phone?.trim() ? student.parent_phone : '—'}
+                                                </TableCell>
+                                                <TableCell>{student.enrollment_date}</TableCell>
+                                                <TableCell>
+                                                    {student.left_academy_date?.trim()
+                                                        ? student.left_academy_date
+                                                        : '—'}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.active ? (
+                                                        <Chip
+                                                            label={ui.adminStudents.chipActive}
+                                                            color="success"
+                                                            size="small"
+                                                            aria-label={`${student.name} ${ui.adminStudents.chipActive}`}
+                                                        />
+                                                    ) : (
+                                                        <Chip
+                                                            label={ui.adminStudents.chipInactive}
+                                                            color="default"
+                                                            size="small"
+                                                            aria-label={`${student.name} ${ui.adminStudents.chipInactive}`}
+                                                        />
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>{renderTextbookFeeCell(student)}</TableCell>
+                                                <TableCell align="right">
+                                                    <Tooltip title={ui.adminStudents.manage}>
+                                                        <IconButton
+                                                            size="small"
+                                                            aria-label={`${student.name} ${ui.adminStudents.manage}`}
+                                                            aria-haspopup="menu"
+                                                            aria-expanded={
+                                                                Boolean(menuAnchor) &&
+                                                                menuStudent?.id === student.id
+                                                            }
+                                                            onClick={(e) => openStatusMenu(e, student)}
+                                                            sx={touchIconButtonSx}
+                                                        >
+                                                            <ManageAccountsIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <IconButton
+                                                        size="small"
+                                                        aria-label={`${student.name} ${ui.adminStudents.editAria}`}
+                                                        onClick={() => onEdit(student)}
+                                                        sx={touchIconButtonSx}
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        size="small"
+                                                        color="error"
+                                                        aria-label={`${student.name} ${ui.adminStudents.deleteAria}`}
+                                                        onClick={() => onDelete(student)}
+                                                        sx={touchIconButtonSx}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <AdminTablePaginationBar
+                            count={totalCount}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
+                            onPageChange={onPageChange}
+                            onRowsPerPageChange={(n) => {
+                                onRowsPerPageChange(n);
+                                onPageChange(0);
+                            }}
+                        />
+                    </>
+                )}
             </Paper>
             <Menu
                 anchorEl={menuAnchor}
@@ -317,17 +437,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                {isXs ? (
-                    <MenuItem
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                        onClick={() => {
-                            if (menuStudent) onEdit(menuStudent);
-                            closeStatusMenu();
-                        }}
-                    >
-                        {ui.adminStudents.editAria}
-                    </MenuItem>
-                ) : null}
                 <MenuItem
                     sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
                     disabled={menuStudent?.active === true}
@@ -348,17 +457,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                 >
                     {ui.adminStudents.setInactive}
                 </MenuItem>
-                {isXs ? (
-                    <MenuItem
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX, color: 'error.main' }}
-                        onClick={() => {
-                            if (menuStudent) onDelete(menuStudent);
-                            closeStatusMenu();
-                        }}
-                    >
-                        {ui.adminStudents.deleteAria}
-                    </MenuItem>
-                ) : null}
             </Menu>
         </Box>
     );

@@ -16,6 +16,10 @@ import {
     TablePagination,
     Switch,
     FormControlLabel,
+    Stack,
+    useMediaQuery,
+    useTheme,
+    Paper,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import {
@@ -28,6 +32,11 @@ import {
 import type { Database } from '@/lib/supabase';
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import { ui } from '@/i18n/ui';
+import {
+    MobileCardList,
+    MobileCardListItem,
+    MobileStackedCard,
+} from '@/components/common/adminTable';
 import { tablePaginationTouchSx, touchButtonSx } from '@/constants/touch';
 
 type TextbookRow = Database['public']['Tables']['textbooks']['Row'];
@@ -37,6 +46,17 @@ function pickTextbook (
 ): Pick<TextbookRow, 'id' | 'name' | 'price'> | null {
     if (!t) return null;
     return Array.isArray(t) ? t[0] ?? null : t;
+}
+
+function AssignmentInfoRow ({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <Stack direction="row" spacing={1} alignItems="flex-start" flexWrap="wrap">
+            <Typography component="span" variant="caption" color="text.secondary" sx={{ minWidth: 72 }}>
+                {label}
+            </Typography>
+            <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
+        </Stack>
+    );
 }
 
 interface StudentTextbooksPanelProps {
@@ -57,6 +77,8 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
     const [assignId, setAssignId] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const theme = useTheme();
+    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -190,97 +212,192 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
                 </Button>
             </Box>
 
-            <TableContainer>
-                <Table size="small" aria-label={ui.adminTextbooks.assignmentsTableAriaLabel}>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>{ui.adminTextbooks.textbookCol}</TableCell>
-                            <TableCell align="right">{ui.adminTextbooks.price}</TableCell>
-                            <TableCell align="center">{ui.adminTextbooks.textbookFeeColumn}</TableCell>
-                            <TableCell align="center">{ui.adminTextbooks.paidDateColumn}</TableCell>
-                            <TableCell align="right" width={72} sx={{ position: 'relative' }}>
-                                <Box component="span" sx={visuallyHidden}>
-                                    {ui.common.tableActionsHeader}
-                                </Box>
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
+            {isMobileList ? (
+                <Paper variant="outlined">
+                    <Box sx={{ p: 2 }}>
                         {loading ? (
-                            <TableRow>
-                                <TableCell colSpan={5}>…</TableCell>
-                            </TableRow>
+                            <Typography color="text.secondary" textAlign="center" py={3}>
+                                {ui.common.loading}
+                            </Typography>
                         ) : sortedRows.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={5}>{ui.adminTextbooks.emptyAssignments}</TableCell>
-                            </TableRow>
+                            <Typography color="text.secondary" textAlign="center" py={3}>
+                                {ui.adminTextbooks.emptyAssignments}
+                            </Typography>
                         ) : (
-                            pagedRows.map((a) => {
-                                const t = pickTextbook(a.textbooks);
-                                const paidAt =
-                                    a.paid && a.paid_at
-                                        ? new Date(a.paid_at + 'T12:00:00').toLocaleDateString('ko-KR')
-                                        : '—';
-                                return (
-                                    <TableRow key={a.id}>
-                                        <TableCell>{t?.name ?? '—'}</TableCell>
-                                        <TableCell align="right">
-                                            {t?.price != null ? t.price.toLocaleString('ko-KR') : '—'}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        checked={a.paid}
-                                                        onChange={(_, v) => void togglePaid(a, v)}
-                                                        color="success"
-                                                        size="small"
-                                                    />
+                            <MobileCardList>
+                                {pagedRows.map((a) => {
+                                    const t = pickTextbook(a.textbooks);
+                                    const paidAt =
+                                        a.paid && a.paid_at
+                                            ? new Date(a.paid_at + 'T12:00:00').toLocaleDateString('ko-KR')
+                                            : '—';
+                                    return (
+                                        <MobileCardListItem key={a.id}>
+                                            <MobileStackedCard
+                                                actions={
+                                                    <Button
+                                                        fullWidth
+                                                        color="error"
+                                                        variant="outlined"
+                                                        onClick={() => void handleRemove(a.id)}
+                                                        sx={touchButtonSx}
+                                                    >
+                                                        {ui.adminTextbooks.delete}
+                                                    </Button>
                                                 }
-                                                label={a.paid ? ui.adminTextbooks.paid : ui.adminTextbooks.unpaid}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Typography variant="body2" component="span">
-                                                {paidAt}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            <Button
-                                                size="small"
-                                                color="error"
-                                                onClick={() => void handleRemove(a.id)}
-                                                sx={touchButtonSx}
                                             >
-                                                {ui.adminTextbooks.delete}
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })
+                                                <Stack spacing={1.25}>
+                                                    <Typography variant="subtitle1" fontWeight={600} component="h3">
+                                                        {t?.name ?? '—'}
+                                                    </Typography>
+                                                    <AssignmentInfoRow label={ui.adminTextbooks.price}>
+                                                        <Typography variant="body2">
+                                                            {t?.price != null
+                                                                ? t.price.toLocaleString('ko-KR')
+                                                                : '—'}
+                                                        </Typography>
+                                                    </AssignmentInfoRow>
+                                                    <AssignmentInfoRow label={ui.adminTextbooks.paidDateColumn}>
+                                                        <Typography variant="body2" component="span">
+                                                            {paidAt}
+                                                        </Typography>
+                                                    </AssignmentInfoRow>
+                                                    <FormControlLabel
+                                                        control={
+                                                            <Switch
+                                                                checked={a.paid}
+                                                                onChange={(_, v) => void togglePaid(a, v)}
+                                                                color="success"
+                                                                size="small"
+                                                            />
+                                                        }
+                                                        label={
+                                                            a.paid ? ui.adminTextbooks.paid : ui.adminTextbooks.unpaid
+                                                        }
+                                                    />
+                                                </Stack>
+                                            </MobileStackedCard>
+                                        </MobileCardListItem>
+                                    );
+                                })}
+                            </MobileCardList>
                         )}
-                    </TableBody>
-                </Table>
-                {!loading && sortedRows.length > 0 ? (
-                    <TablePagination
-                        component="div"
-                        count={sortedRows.length}
-                        page={page}
-                        onPageChange={(_, p) => setPage(p)}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={(e) => {
-                            setRowsPerPage(parseInt(e.target.value, 10));
-                            setPage(0);
-                        }}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        labelRowsPerPage={ui.pagination.labelRowsPerPage}
-                        labelDisplayedRows={({ from, to, count }) =>
-                            count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
-                        }
-                        sx={tablePaginationTouchSx}
-                    />
-                ) : null}
-            </TableContainer>
+                    </Box>
+                    {!loading && sortedRows.length > 0 ? (
+                        <TablePagination
+                            component="div"
+                            count={sortedRows.length}
+                            page={page}
+                            onPageChange={(_, p) => setPage(p)}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={(e) => {
+                                setRowsPerPage(parseInt(e.target.value, 10));
+                                setPage(0);
+                            }}
+                            rowsPerPageOptions={[5, 10, 25]}
+                            labelRowsPerPage={ui.pagination.labelRowsPerPage}
+                            labelDisplayedRows={({ from, to, count }) =>
+                                count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                            }
+                            sx={tablePaginationTouchSx}
+                        />
+                    ) : null}
+                </Paper>
+            ) : (
+                <TableContainer>
+                    <Table size="small" aria-label={ui.adminTextbooks.assignmentsTableAriaLabel}>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>{ui.adminTextbooks.textbookCol}</TableCell>
+                                <TableCell align="right">{ui.adminTextbooks.price}</TableCell>
+                                <TableCell align="center">{ui.adminTextbooks.textbookFeeColumn}</TableCell>
+                                <TableCell align="center">{ui.adminTextbooks.paidDateColumn}</TableCell>
+                                <TableCell align="right" width={72} sx={{ position: 'relative' }}>
+                                    <Box component="span" sx={visuallyHidden}>
+                                        {ui.common.tableActionsHeader}
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={5}>…</TableCell>
+                                </TableRow>
+                            ) : sortedRows.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5}>{ui.adminTextbooks.emptyAssignments}</TableCell>
+                                </TableRow>
+                            ) : (
+                                pagedRows.map((a) => {
+                                    const t = pickTextbook(a.textbooks);
+                                    const paidAt =
+                                        a.paid && a.paid_at
+                                            ? new Date(a.paid_at + 'T12:00:00').toLocaleDateString('ko-KR')
+                                            : '—';
+                                    return (
+                                        <TableRow key={a.id}>
+                                            <TableCell>{t?.name ?? '—'}</TableCell>
+                                            <TableCell align="right">
+                                                {t?.price != null ? t.price.toLocaleString('ko-KR') : '—'}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <FormControlLabel
+                                                    control={
+                                                        <Switch
+                                                            checked={a.paid}
+                                                            onChange={(_, v) => void togglePaid(a, v)}
+                                                            color="success"
+                                                            size="small"
+                                                        />
+                                                    }
+                                                    label={
+                                                        a.paid ? ui.adminTextbooks.paid : ui.adminTextbooks.unpaid
+                                                    }
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Typography variant="body2" component="span">
+                                                    {paidAt}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <Button
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={() => void handleRemove(a.id)}
+                                                    sx={touchButtonSx}
+                                                >
+                                                    {ui.adminTextbooks.delete}
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            )}
+                        </TableBody>
+                    </Table>
+                    {!loading && sortedRows.length > 0 ? (
+                        <TablePagination
+                            component="div"
+                            count={sortedRows.length}
+                            page={page}
+                            onPageChange={(_, p) => setPage(p)}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={(e) => {
+                                setRowsPerPage(parseInt(e.target.value, 10));
+                                setPage(0);
+                            }}
+                            rowsPerPageOptions={[5, 10, 25]}
+                            labelRowsPerPage={ui.pagination.labelRowsPerPage}
+                            labelDisplayedRows={({ from, to, count }) =>
+                                count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                            }
+                            sx={tablePaginationTouchSx}
+                        />
+                    ) : null}
+                </TableContainer>
+            )}
         </Box>
     );
 };

@@ -1,9 +1,11 @@
 import { lazy, Suspense, useLayoutEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, CircularProgress, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import { MOBILE_BOTTOM_NAV_INNER_HEIGHT_PX } from '@/constants/layout';
 import { PageTopBarProvider } from '@/contexts/PageTopBarContext';
 import { MobileSidebarProvider } from '@/contexts/MobileSidebarContext';
 import { ROUTES } from '@/constants/routes';
@@ -40,6 +42,8 @@ function RouteFallback() {
 export function AppRoutes() {
     const location = useLocation();
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isPhone = useMediaQuery(theme.breakpoints.down('sm'));
 
     useLayoutEffect(() => {
         if (!isStandalonePwa()) return;
@@ -68,12 +72,14 @@ export function AppRoutes() {
                     overflowX: 'hidden',
                     p: showLayout ? { xs: 2, sm: 2.5, md: 3, lg: 3.5 } : 0,
                     pb: showLayout
-                        ? {
-                              xs: 'max(16px, env(safe-area-inset-bottom))',
-                              sm: 2.5,
-                              md: 3,
-                              lg: 3.5,
-                          }
+                        ? isPhone
+                            ? `calc(${MOBILE_BOTTOM_NAV_INNER_HEIGHT_PX}px + env(safe-area-inset-bottom))`
+                            : {
+                                  xs: 'max(16px, env(safe-area-inset-bottom))',
+                                  sm: 2.5,
+                                  md: 3,
+                                  lg: 3.5,
+                              }
                         : 0,
                     transition: 'all 0.3s',
                 }}
@@ -116,6 +122,7 @@ export function AppRoutes() {
                 </Suspense>
             </Box>
             </PageTopBarProvider>
+            {showLayout && <MobileBottomNav />}
         </Box>
         </MobileSidebarProvider>
     );
