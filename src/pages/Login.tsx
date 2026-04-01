@@ -48,6 +48,7 @@ const Login: React.FC = () => {
     const [loginForm, setLoginForm] = useState({
         email: '',
         password: '',
+        rememberMe: true,
     });
 
     const [signupForm, setSignupForm] = useState({
@@ -73,7 +74,7 @@ const Login: React.FC = () => {
         setLoading(true);
         try {
             const email = loginForm.email.trim().toLowerCase();
-            const { error: err } = await signIn(email, loginForm.password);
+            const { error: err } = await signIn(email, loginForm.password, loginForm.rememberMe);
             if (err) setError(err.message);
         } catch {
             setError(ui.auth.loginGenericError);

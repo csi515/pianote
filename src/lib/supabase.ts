@@ -1,10 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
+import { createAuthStorageProxy } from '@/lib/authStorage';
 
 // Supabase 프로젝트 정보 (환경 변수에서 가져오기)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        storage: createAuthStorageProxy(),
+    },
+});
 
 // 타입 정의
 export type Json =

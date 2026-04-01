@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, TextField, Button, Link } from '@mui/material';
+import { Box, TextField, Button, Link, Checkbox, FormControlLabel } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
 import { ui } from '@/i18n/ui';
@@ -9,6 +9,8 @@ const t = ui.auth.loginScreen;
 export type LoginFormState = {
     email: string;
     password: string;
+    /** true: localStorage 세션(브라우저 재실행 후에도 유지). false: sessionStorage(탭 단위) */
+    rememberMe: boolean;
 };
 
 interface LoginFormProps {
@@ -45,6 +47,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 required
                 autoComplete="current-password"
                 sx={{ mb: 1 }}
+            />
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={form.rememberMe}
+                        onChange={(_, checked) => onChange({ ...form, rememberMe: checked })}
+                        color="primary"
+                    />
+                }
+                label={t.rememberMeLabel}
+                sx={{ mb: 1, alignItems: 'flex-start', ml: -0.5 }}
             />
             <Box sx={{ mb: 2, textAlign: 'right' }}>
                 <Link

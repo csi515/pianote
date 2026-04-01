@@ -17,7 +17,7 @@ export type FormDialogProps = {
     cancelLabel?: string;
     maxWidth?: Breakpoint | false;
     fullWidth?: boolean;
-    /** DialogContent에 기본 gap·pt 적용 */
+    /** DialogContent에 추가 sx (상단 pt는 테마 MuiDialogContent) */
     contentSx?: object;
 };
 
@@ -60,7 +60,6 @@ const FormDialog: React.FC<FormDialogProps> = ({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
-                    pt: 1,
                     ...(contentSx ?? {}),
                 }}
             >

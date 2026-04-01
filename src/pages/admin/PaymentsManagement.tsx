@@ -454,7 +454,7 @@ const PaymentsManagement: React.FC = () => {
                 <DialogTitle component="h2" id={paymentDialogTitleId}>
                     {ui.adminPayments.add}
                 </DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <FormControl fullWidth required>
                         <InputLabel>{ui.adminPayments.student}</InputLabel>
                         <Select

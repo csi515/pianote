@@ -232,7 +232,7 @@ export const StudentMediaPanel: React.FC<StudentMediaPanelProps> = ({ studentId 
                 <DialogTitle component="h2" id={addDialogTitleId}>
                     {ui.adminMedia.add}
                 </DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
                         label={ui.adminMedia.youtubeUrl}
                         value={form.youtube_url}

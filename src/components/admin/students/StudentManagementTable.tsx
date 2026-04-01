@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Box,
     Button,
@@ -11,8 +11,6 @@ import {
     TableRow,
     Chip,
     IconButton,
-    Menu,
-    MenuItem,
     Tooltip,
     Typography,
     useMediaQuery,
@@ -22,7 +20,6 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import { ui } from '@/i18n/ui';
 import type { StudentWithParent } from '@/services/students.service';
 import type { StudentTextbookPaymentRowStatus } from '@/services/textbooks.service';
@@ -51,7 +48,6 @@ interface StudentManagementTableProps {
     onRowsPerPageChange: (rowsPerPage: number) => void;
     onEdit: (student: StudentWithParent) => void;
     onDelete: (student: StudentWithParent) => void;
-    onActiveChange: (student: StudentWithParent, active: boolean) => void;
     /** 테이블 상단에 표시할 학생 추가 액션(전역 TopBar와 중복되지 않도록 여기 배치) */
     onAddStudent?: () => void;
 }
@@ -107,24 +103,10 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
     onRowsPerPageChange,
     onEdit,
     onDelete,
-    onActiveChange,
     onAddStudent,
 }) => {
     const theme = useTheme();
     const isMobileList = useMediaQuery(theme.breakpoints.down('md'));
-
-    const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-    const [menuStudent, setMenuStudent] = useState<StudentWithParent | null>(null);
-
-    const openStatusMenu = (event: React.MouseEvent<HTMLElement>, student: StudentWithParent) => {
-        setMenuAnchor(event.currentTarget);
-        setMenuStudent(student);
-    };
-
-    const closeStatusMenu = () => {
-        setMenuAnchor(null);
-        setMenuStudent(null);
-    };
 
     const colSpan = 7;
 
@@ -182,18 +164,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
             <MobileStackedCard
                 actions={
                     <>
-                        <Tooltip title={ui.adminStudents.manage}>
-                            <IconButton
-                                size="small"
-                                aria-label={`${student.name} ${ui.adminStudents.manage}`}
-                                aria-haspopup="menu"
-                                aria-expanded={Boolean(menuAnchor) && menuStudent?.id === student.id}
-                                onClick={(e) => openStatusMenu(e, student)}
-                                sx={touchIconButtonSx}
-                            >
-                                <ManageAccountsIcon />
-                            </IconButton>
-                        </Tooltip>
                         <Tooltip title={ui.adminStudents.editAria}>
                             <IconButton
                                 size="small"
@@ -355,21 +325,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                                                 <TableCell>{student.enrollment_date}</TableCell>
                                                 <TableCell>{renderTextbookFeeCell(student)}</TableCell>
                                                 <TableCell align="right">
-                                                    <Tooltip title={ui.adminStudents.manage}>
-                                                        <IconButton
-                                                            size="small"
-                                                            aria-label={`${student.name} ${ui.adminStudents.manage}`}
-                                                            aria-haspopup="menu"
-                                                            aria-expanded={
-                                                                Boolean(menuAnchor) &&
-                                                                menuStudent?.id === student.id
-                                                            }
-                                                            onClick={(e) => openStatusMenu(e, student)}
-                                                            sx={touchIconButtonSx}
-                                                        >
-                                                            <ManageAccountsIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
                                                     <IconButton
                                                         size="small"
                                                         aria-label={`${student.name} ${ui.adminStudents.editAria}`}
@@ -407,34 +362,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                     </>
                 )}
             </Paper>
-            <Menu
-                anchorEl={menuAnchor}
-                open={Boolean(menuAnchor)}
-                onClose={closeStatusMenu}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <MenuItem
-                    sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    disabled={menuStudent?.active === true}
-                    onClick={() => {
-                        if (menuStudent) onActiveChange(menuStudent, true);
-                        closeStatusMenu();
-                    }}
-                >
-                    {ui.adminStudents.setActive}
-                </MenuItem>
-                <MenuItem
-                    sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    disabled={menuStudent?.active === false}
-                    onClick={() => {
-                        if (menuStudent) onActiveChange(menuStudent, false);
-                        closeStatusMenu();
-                    }}
-                >
-                    {ui.adminStudents.setInactive}
-                </MenuItem>
-            </Menu>
         </Box>
     );
 };

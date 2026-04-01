@@ -225,8 +225,13 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                 direction="row"
                 alignItems="center"
                 justifyContent="center"
-                spacing={1}
-                sx={{ mb: 2, flexWrap: 'wrap', gap: 1, width: '100%' }}
+                spacing={0}
+                sx={{
+                    mb: 2,
+                    flexWrap: 'wrap',
+                    gap: { xs: 0.5, sm: 1 },
+                    width: '100%',
+                }}
             >
                 <IconButton
                     type="button"
@@ -237,7 +242,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                 >
                     <ChevronLeftIcon />
                 </IconButton>
-                <FormControl size="small" sx={{ minWidth: 108 }}>
+                <FormControl size="small" sx={{ minWidth: { xs: 92, sm: 108 } }}>
                     <InputLabel id="billing-year-label">{ui.adminPayments.billingYearLabel}</InputLabel>
                     <Select
                         labelId="billing-year-label"
@@ -254,7 +259,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                         ))}
                     </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 108 }}>
+                <FormControl size="small" sx={{ minWidth: { xs: 92, sm: 108 } }}>
                     <InputLabel id="billing-month-label">{ui.adminPayments.billingMonthOnlyLabel}</InputLabel>
                     <Select
                         labelId="billing-month-label"
@@ -523,7 +528,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                 <DialogTitle component="h2" id={monthlyDialogTitleId}>
                     {ui.adminPayments.registerThisMonth}
                 </DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Typography variant="body2" color="text.secondary">
                         {formatBillingMonthLabelKo(billingMonthInput)} ·{' '}
                         {students.find((x) => x.id === monthlyForm.student_id)?.name ?? ''}

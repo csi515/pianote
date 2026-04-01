@@ -66,6 +66,7 @@ const StudentManagement: React.FC = () => {
         enrollment_date: '',
         left_academy_date: '',
         monthly_fee: '',
+        active: true,
     });
     const [textbookCatalog, setTextbookCatalog] = useState<TextbookRow[]>([]);
     const [textbookPaymentByStudent, setTextbookPaymentByStudent] = useState<
@@ -151,6 +152,7 @@ const StudentManagement: React.FC = () => {
                 left_academy_date: student.left_academy_date ?? '',
                 monthly_fee:
                     student.monthly_fee != null ? formatMonthlyFeeForInput(student.monthly_fee) : '',
+                active: student.active,
             });
         } else {
             setEditingStudent(null);
@@ -165,6 +167,7 @@ const StudentManagement: React.FC = () => {
                 left_academy_date: '',
                 monthly_fee:
                     academyDefaultFee != null ? formatMonthlyFeeForInput(academyDefaultFee) : '',
+                active: true,
             });
         }
         setDialogOpen(true);
@@ -181,6 +184,7 @@ const StudentManagement: React.FC = () => {
             enrollment_date: '',
             left_academy_date: '',
             monthly_fee: '',
+            active: true,
         });
     };
 
@@ -221,6 +225,7 @@ const StudentManagement: React.FC = () => {
                     enrollment_date: formData.enrollment_date.trim(),
                     left_academy_date: trimOrNull(formData.left_academy_date),
                     monthly_fee: parseMonthlyFeeInput(formData.monthly_fee),
+                    active: formData.active,
                 });
                 if (result.success) {
                     enqueueSnackbar(ui.adminStudents.saveSuccessEdit, { variant: 'success' });
@@ -289,20 +294,6 @@ const StudentManagement: React.FC = () => {
         }
     };
 
-    const handleActiveChange = React.useCallback(
-        async (student: StudentWithParent, active: boolean) => {
-            const result = await updateStudent(student.id, { active });
-            if (result.success) {
-                enqueueSnackbar(ui.adminStudents.statusUpdated, { variant: 'success' });
-                if (academy?.id) invalidateAcademyAdminMetricsCache(academy.id);
-                void loadStudentsPage();
-            } else {
-                enqueueSnackbar(result.error || ui.adminStudents.saveError, { variant: 'error' });
-            }
-        },
-        [academy?.id, enqueueSnackbar, loadStudentsPage]
-    );
-
     if (!academy) {
         return (
             <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3 } }}>
@@ -326,7 +317,6 @@ const StudentManagement: React.FC = () => {
                 onRowsPerPageChange={setRowsPerPage}
                 onEdit={handleOpenDialog}
                 onDelete={handleDelete}
-                onActiveChange={handleActiveChange}
                 onAddStudent={() => handleOpenDialog()}
             />
 

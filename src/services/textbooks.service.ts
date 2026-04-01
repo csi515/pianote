@@ -138,6 +138,21 @@ export async function setStudentTextbookPaid (
     return { error: error ? new Error(error.message) : null };
 }
 
+/** 납부 처리된 교재의 납부일만 변경 (스위치로 납부한 뒤 날짜 조정용) */
+export async function updateStudentTextbookPaidDate (
+    assignmentId: string,
+    paidAtIso: string
+): Promise<{ error: Error | null }> {
+    const { error } = await supabase
+        .from('student_textbooks')
+        .update({
+            paid: true,
+            paid_at: paidAtIso,
+        })
+        .eq('id', assignmentId);
+    return { error: error ? new Error(error.message) : null };
+}
+
 export async function removeStudentTextbook (assignmentId: string): Promise<{ error: Error | null }> {
     const { error } = await supabase.from('student_textbooks').delete().eq('id', assignmentId);
     return { error: error ? new Error(error.message) : null };

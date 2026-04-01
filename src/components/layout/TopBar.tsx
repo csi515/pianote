@@ -9,14 +9,17 @@ import {
     Badge,
     Popover,
     Button,
+    useMediaQuery,
+    useTheme,
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTopBarContextOptional } from '@/contexts/PageTopBarContext';
 import { ui } from '@/i18n/ui';
 import { ROUTES } from '@/constants/routes';
-import { MIN_TOUCH_TARGET_PX } from '@/constants/touch';
+import { MIN_TOUCH_TARGET_PX, touchIconButtonSx } from '@/constants/touch';
 import { getAcademyAdminMetrics } from '@/services/academyAdminMetrics.service';
 import {
     loadAdminNotificationPrefs,
@@ -25,8 +28,10 @@ import {
 } from '@/lib/notificationPreferences';
 
 const TopBar: React.FC = () => {
-    const { profile, academy } = useAuth();
+    const { profile, academy, signOut } = useAuth();
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isBelowMd = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
     const pageTop = usePageTopBarContextOptional();
     const displayName = profile?.name?.trim() || ui.topBar.userFallback;
     const isAdmin = profile?.role === 'admin';
@@ -76,6 +81,11 @@ const TopBar: React.FC = () => {
 
     const pageTitle = pageTop?.title ?? null;
 
+    const handleLogout = async () => {
+        await signOut();
+        navigate(ROUTES.login);
+    };
+
     return (
         <AppBar
             position="sticky"
@@ -93,11 +103,18 @@ const TopBar: React.FC = () => {
                     gap: { xs: 0.5, sm: 1.5 },
                     minHeight: { xs: 56, sm: 58, md: 64 },
                     py: 0.5,
-                    px: { xs: 1, sm: 2, md: 2.5 },
+                    px: { xs: 2, sm: 2, md: 2.5 },
                     flexWrap: 'nowrap',
                 }}
             >
-                <Box flexGrow={1} minWidth={0} sx={{ overflow: 'hidden' }}>
+                <Box
+                    flexGrow={1}
+                    minWidth={0}
+                    sx={{
+                        overflow: 'hidden',
+                        pl: { xs: 0.5, sm: 0 },
+                    }}
+                >
                     {pageTitle ? (
                         <>
                             <Typography
@@ -175,6 +192,19 @@ const TopBar: React.FC = () => {
                         <NotificationsIcon />
                     </Badge>
                 </IconButton>
+                {isBelowMd ? (
+                    <Tooltip title={ui.layout.sidebarLogout}>
+                        <IconButton
+                            type="button"
+                            color="inherit"
+                            aria-label={ui.layout.sidebarLogout}
+                            onClick={() => void handleLogout()}
+                            sx={{ ...touchIconButtonSx, flexShrink: 0, color: 'text.secondary' }}
+                        >
+                            <LogoutIcon />
+                        </IconButton>
+                    </Tooltip>
+                ) : null}
                 {isAdmin && (
                     <Popover
                         open={open}

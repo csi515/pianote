@@ -302,6 +302,16 @@ export const theme = createTheme({
         }),
       },
     },
+    /** DialogTitle 직후 기본 paddingTop:0 은 outlined Select/TextField 라벨 노치가 스크롤 영역 상단에서 잘림 */
+    MuiDialogContent: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          '.MuiDialogTitle-root + &': {
+            paddingTop: theme.spacing(2),
+          },
+        }),
+      },
+    },
     MuiDialogActions: {
       styleOverrides: {
         root: ({ theme }) => ({

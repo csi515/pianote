@@ -23,6 +23,8 @@ export const ui = {
             submit: '로그인',
             submitting: '로그인 중...',
             forgotPasswordLink: '비밀번호를 잊으셨나요?',
+            /** 체크 해제 시 브라우저·탭 종료 후 재방문 시 다시 로그인 */
+            rememberMeLabel: '로그인 상태 유지',
         },
         /** 로그인 후 설정에서 변경 / 재설정 링크 후 */
         passwordChange: {
@@ -201,6 +203,7 @@ export const ui = {
             '교재를 지급한 뒤 납부 여부를 표시합니다. 이미 등록된 교재는 목록에서 빠집니다.',
         textbookFeeColumn: '교재비 납부',
         paidDateColumn: '납부일',
+        textbookPaidDateInputAria: '교재비 납부일',
         stepsTableAriaLabel: '{name} 커리큘럼 단계 목록',
         catalogEmptyHint: '먼저 사이드바 「교재 관리」에서 교재를 등록해 주세요.',
         studentPanelLoadError: '교재 목록을 불러오지 못했습니다.',
@@ -386,9 +389,14 @@ export const ui = {
         attendanceLogEmpty: '등·하원 기록이 없습니다.',
         attendanceTypeIn: '등원',
         attendanceTypeOut: '하원',
+        /** 목록 작업 열(이전 상태 메뉴) — 접근성·문구 호환용 */
         manage: '상태 관리',
         setActive: '활성으로 설정',
         setInactive: '비활성으로 설정',
+        /** 수정 모달 기본 탭 — 활성/비활성 스위치 */
+        activeStatusLabel: '학적 상태',
+        activeStatusHelper:
+            '비활성은 퇴원 처리에 가깝게 목록·집계·알림에서 제외됩니다. (교재비 열은 — 표시)',
         statusUpdated: '학생 상태를 변경했습니다.',
         dialogTitleEdit: '학생 정보 수정',
         dialogTitleAdd: '학생 추가',

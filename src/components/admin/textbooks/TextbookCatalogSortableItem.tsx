@@ -1,11 +1,11 @@
 import React from 'react';
-import { Box, Button, IconButton, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import { Box, IconButton, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { touchButtonSx, touchIconButtonSx } from '@/constants/touch';
+import { touchIconButtonSx } from '@/constants/touch';
 import type { Database } from '@/lib/supabase';
 import { ui } from '@/i18n/ui';
 
@@ -13,23 +13,15 @@ type TextbookRow = Database['public']['Tables']['textbooks']['Row'];
 
 export type TextbookCatalogSortableItemProps = {
     row: TextbookRow;
-    onMoveUp: () => void;
-    onMoveDown: () => void;
     onEdit: () => void;
     onDelete: () => void;
-    disableUp: boolean;
-    disableDown: boolean;
     reorderDisabled?: boolean;
 };
 
 export const TextbookCatalogSortableItem: React.FC<TextbookCatalogSortableItemProps> = ({
     row,
-    onMoveUp,
-    onMoveDown,
     onEdit,
     onDelete,
-    disableUp,
-    disableDown,
     reorderDisabled = false,
 }) => {
     const theme = useTheme();
@@ -44,50 +36,42 @@ export const TextbookCatalogSortableItem: React.FC<TextbookCatalogSortableItemPr
         transition,
     };
 
-    const reorderControls = (
-        <>
-            <IconButton
-                type="button"
-                size="small"
-                aria-label={ui.adminTextbooks.dragHandleAria}
-                disabled={reorderDisabled}
-                sx={{ ...touchIconButtonSx, cursor: reorderDisabled ? 'default' : 'grab' }}
-                {...attributes}
-                {...listeners}
-            >
-                <DragIndicatorIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-                type="button"
-                aria-label={ui.adminTextbooks.moveOrderUpAria}
-                size="small"
-                disabled={disableUp || reorderDisabled}
-                onClick={onMoveUp}
-                sx={touchIconButtonSx}
-            >
-                <ArrowUpwardIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-                type="button"
-                aria-label={ui.adminTextbooks.moveOrderDownAria}
-                size="small"
-                disabled={disableDown || reorderDisabled}
-                onClick={onMoveDown}
-                sx={touchIconButtonSx}
-            >
-                <ArrowDownwardIcon fontSize="small" />
-            </IconButton>
-        </>
+    const dragHandle = (
+        <IconButton
+            type="button"
+            size="small"
+            aria-label={ui.adminTextbooks.dragHandleAria}
+            disabled={reorderDisabled}
+            sx={{ ...touchIconButtonSx, cursor: reorderDisabled ? 'default' : 'grab' }}
+            {...attributes}
+            {...listeners}
+        >
+            <DragIndicatorIcon fontSize="small" />
+        </IconButton>
     );
 
-    const editDeleteButtons = (
+    const editDeleteIconButtons = (
         <>
-            <Button size="small" variant="outlined" onClick={onEdit} sx={touchButtonSx}>
-                {ui.adminTextbooks.edit}
-            </Button>
-            <Button size="small" color="error" onClick={onDelete} sx={touchButtonSx}>
-                {ui.adminTextbooks.delete}
-            </Button>
+            <IconButton
+                type="button"
+                size="small"
+                color="primary"
+                aria-label={ui.adminTextbooks.edit}
+                onClick={onEdit}
+                sx={touchIconButtonSx}
+            >
+                <EditOutlinedIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+                type="button"
+                size="small"
+                color="error"
+                aria-label={ui.adminTextbooks.delete}
+                onClick={onDelete}
+                sx={touchIconButtonSx}
+            >
+                <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
         </>
     );
 
@@ -103,42 +87,50 @@ export const TextbookCatalogSortableItem: React.FC<TextbookCatalogSortableItemPr
             style={style}
         >
             {isMobileList ? (
-                <>
-                    <Box sx={{ p: 2, pb: 1 }}>
-                        <Stack spacing={1}>
-                            <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600 }}>
-                                {row.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {ui.adminTextbooks.price}: {row.price.toLocaleString('ko-KR')}
-                            </Typography>
-                        </Stack>
-                    </Box>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        px: 1.25,
+                        py: 1,
+                        overflowX: 'auto',
+                        flexWrap: 'nowrap',
+                        WebkitOverflowScrolling: 'touch',
+                    }}
+                >
+                    <Stack direction="row" alignItems="center" gap={0.25} flexShrink={0}>
+                        {dragHandle}
+                    </Stack>
                     <Box
                         sx={{
-                            px: 2,
-                            pb: 2,
-                            pt: 0,
+                            flex: '1 1 auto',
+                            minWidth: 0,
                             display: 'flex',
-                            flexDirection: 'column',
-                            gap: 1.5,
-                            alignItems: 'stretch',
+                            alignItems: 'center',
+                            gap: 1,
+                            overflow: 'hidden',
                         }}
                     >
-                        <Stack
-                            direction="row"
-                            flexWrap="wrap"
-                            gap={0.5}
-                            justifyContent="flex-start"
-                            alignItems="center"
+                        <Typography
+                            variant="body2"
+                            component="span"
+                            fontWeight={600}
+                            noWrap
+                            title={row.name}
+                            sx={{ minWidth: 0 }}
                         >
-                            {reorderControls}
-                        </Stack>
-                        <Stack direction="row" flexWrap="wrap" gap={1} justifyContent="flex-end">
-                            {editDeleteButtons}
-                        </Stack>
+                            {row.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" component="span" flexShrink={0}>
+                            {row.price.toLocaleString('ko-KR')}
+                            {ui.common.currencyWon}
+                        </Typography>
                     </Box>
-                </>
+                    <Stack direction="row" spacing={0.5} alignItems="center" flexShrink={0}>
+                        {editDeleteIconButtons}
+                    </Stack>
+                </Box>
             ) : (
                 <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
                     <Stack
@@ -148,37 +140,7 @@ export const TextbookCatalogSortableItem: React.FC<TextbookCatalogSortableItemPr
                         justifyContent="space-between"
                     >
                         <Stack direction="row" alignItems="center" spacing={0.5} flexWrap="wrap" useFlexGap>
-                            <IconButton
-                                type="button"
-                                size="small"
-                                aria-label={ui.adminTextbooks.dragHandleAria}
-                                disabled={reorderDisabled}
-                                sx={{ ...touchIconButtonSx, cursor: reorderDisabled ? 'default' : 'grab' }}
-                                {...attributes}
-                                {...listeners}
-                            >
-                                <DragIndicatorIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton
-                                type="button"
-                                aria-label={ui.adminTextbooks.moveOrderUpAria}
-                                size="small"
-                                disabled={disableUp || reorderDisabled}
-                                onClick={onMoveUp}
-                                sx={touchIconButtonSx}
-                            >
-                                <ArrowUpwardIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton
-                                type="button"
-                                aria-label={ui.adminTextbooks.moveOrderDownAria}
-                                size="small"
-                                disabled={disableDown || reorderDisabled}
-                                onClick={onMoveDown}
-                                sx={touchIconButtonSx}
-                            >
-                                <ArrowDownwardIcon fontSize="small" />
-                            </IconButton>
+                            {dragHandle}
                             <Typography variant="subtitle1" component="span" sx={{ fontWeight: 600, ml: 0.5 }}>
                                 {row.name}
                             </Typography>
@@ -192,13 +154,8 @@ export const TextbookCatalogSortableItem: React.FC<TextbookCatalogSortableItemPr
                             <Typography variant="body2" color="text.secondary" component="span">
                                 {ui.adminTextbooks.price}: {row.price.toLocaleString('ko-KR')}
                             </Typography>
-                            <Stack direction="row" spacing={1}>
-                                <Button size="small" variant="outlined" onClick={onEdit}>
-                                    {ui.adminTextbooks.edit}
-                                </Button>
-                                <Button size="small" color="error" onClick={onDelete}>
-                                    {ui.adminTextbooks.delete}
-                                </Button>
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                                {editDeleteIconButtons}
                             </Stack>
                         </Stack>
                     </Stack>

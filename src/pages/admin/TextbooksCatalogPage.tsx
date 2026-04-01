@@ -175,16 +175,6 @@ const TextbooksCatalogPage: React.FC = () => {
         [academy, enqueueSnackbar, load]
     );
 
-    const moveTextbook = (id: string, dir: -1 | 1) => {
-        if (isReordering) return;
-        const idx = rows.findIndex((x) => x.id === id);
-        const j = idx + dir;
-        if (j < 0 || j >= rows.length) return;
-        const next = [...rows];
-        [next[idx], next[j]] = [next[j], next[idx]];
-        void applyReorder(next.map((r) => r.id));
-    };
-
     const handleDragStart = (event: DragStartEvent) => {
         setActiveDragId(String(event.active.id));
     };
@@ -264,22 +254,15 @@ const TextbooksCatalogPage: React.FC = () => {
                                 pr: { md: 0.5 },
                             }}
                         >
-                            {pagedRows.map((r, indexOnPage) => {
-                                const globalIndex = page * rowsPerPage + indexOnPage;
-                                return (
-                                    <TextbookCatalogSortableItem
-                                        key={r.id}
-                                        row={r}
-                                        onMoveUp={() => moveTextbook(r.id, -1)}
-                                        onMoveDown={() => moveTextbook(r.id, 1)}
-                                        onEdit={() => openEdit(r)}
-                                        onDelete={() => void handleDelete(r)}
-                                        disableUp={globalIndex === 0}
-                                        disableDown={globalIndex === rows.length - 1}
-                                        reorderDisabled={isReordering}
-                                    />
-                                );
-                            })}
+                            {pagedRows.map((r) => (
+                                <TextbookCatalogSortableItem
+                                    key={r.id}
+                                    row={r}
+                                    onEdit={() => openEdit(r)}
+                                    onDelete={() => void handleDelete(r)}
+                                    reorderDisabled={isReordering}
+                                />
+                            ))}
                         </Box>
                     </SortableContext>
                     <TablePagination

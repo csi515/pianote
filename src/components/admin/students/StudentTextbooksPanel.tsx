@@ -17,6 +17,7 @@ import {
     Switch,
     FormControlLabel,
     Stack,
+    TextField,
     useMediaQuery,
     useTheme,
     Paper,
@@ -26,6 +27,7 @@ import {
     listStudentTextbooks,
     assignTextbook,
     setStudentTextbookPaid,
+    updateStudentTextbookPaidDate,
     removeStudentTextbook,
     type StudentTextbookWithDetails,
 } from '@/services/textbooks.service';
@@ -161,6 +163,16 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
     const handleRemove = async (id: string) => {
         if (!window.confirm(ui.adminTextbooks.studentPanelRemoveConfirm)) return;
         const { error } = await removeStudentTextbook(id);
+        if (error) {
+            enqueueSnackbar(error.message, { variant: 'error' });
+            return;
+        }
+        void load();
+        onAssignmentsChanged?.(studentId);
+    };
+
+    const commitTextbookPaidDate = async (row: StudentTextbookWithDetails, isoDate: string) => {
+        const { error } = await updateStudentTextbookPaidDate(row.id, isoDate);
         if (error) {
             enqueueSnackbar(error.message, { variant: 'error' });
             return;
@@ -308,8 +320,18 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
                                 <TableCell>{ui.adminTextbooks.textbookCol}</TableCell>
                                 <TableCell align="right">{ui.adminTextbooks.price}</TableCell>
                                 <TableCell align="center">{ui.adminTextbooks.textbookFeeColumn}</TableCell>
-                                <TableCell align="center">{ui.adminTextbooks.paidDateColumn}</TableCell>
-                                <TableCell align="right" width={72} sx={{ position: 'relative' }}>
+                                <TableCell align="center" sx={{ minWidth: 160 }}>
+                                    {ui.adminTextbooks.paidDateColumn}
+                                </TableCell>
+                                <TableCell
+                                    align="right"
+                                    sx={{
+                                        position: 'relative',
+                                        whiteSpace: 'nowrap',
+                                        width: 1,
+                                        minWidth: 96,
+                                    }}
+                                >
                                     <Box component="span" sx={visuallyHidden}>
                                         {ui.common.tableActionsHeader}
                                     </Box>
@@ -328,17 +350,13 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
                             ) : (
                                 pagedRows.map((a) => {
                                     const t = pickTextbook(a.textbooks);
-                                    const paidAt =
-                                        a.paid && a.paid_at
-                                            ? new Date(a.paid_at + 'T12:00:00').toLocaleDateString('ko-KR')
-                                            : '—';
                                     return (
                                         <TableRow key={a.id}>
                                             <TableCell>{t?.name ?? '—'}</TableCell>
                                             <TableCell align="right">
                                                 {t?.price != null ? t.price.toLocaleString('ko-KR') : '—'}
                                             </TableCell>
-                                            <TableCell align="center">
+                                            <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
                                                 <FormControlLabel
                                                     control={
                                                         <Switch
@@ -354,16 +372,42 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
-                                                <Typography variant="body2" component="span">
-                                                    {paidAt}
-                                                </Typography>
+                                                {a.paid ? (
+                                                    <TextField
+                                                        type="date"
+                                                        size="small"
+                                                        value={a.paid_at ?? ''}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value;
+                                                            if (v && v !== a.paid_at) {
+                                                                void commitTextbookPaidDate(a, v);
+                                                            }
+                                                        }}
+                                                        variant="standard"
+                                                        inputProps={{
+                                                            'aria-label':
+                                                                ui.adminTextbooks.textbookPaidDateInputAria,
+                                                        }}
+                                                        sx={{
+                                                            minWidth: 148,
+                                                            '& .MuiInputBase-input': { py: 0.5 },
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <Typography variant="body2" component="span">
+                                                        —
+                                                    </Typography>
+                                                )}
                                             </TableCell>
-                                            <TableCell align="right">
+                                            <TableCell
+                                                align="right"
+                                                sx={{ whiteSpace: 'nowrap', width: 1, minWidth: 96 }}
+                                            >
                                                 <Button
                                                     size="small"
                                                     color="error"
                                                     onClick={() => void handleRemove(a.id)}
-                                                    sx={touchButtonSx}
+                                                    sx={{ ...touchButtonSx, whiteSpace: 'nowrap' }}
                                                 >
                                                     {ui.adminTextbooks.delete}
                                                 </Button>

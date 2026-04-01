@@ -6,6 +6,7 @@ import { AUTH_NOTICE_PROFILE_MISSING, AUTH_SESSION_NOTICE_KEY } from '@/lib/auth
 import { mapAuthError, mapLoginAuthError, mapPasswordUpdateError } from '@/lib/mapAuthError';
 import { signUpAdmin } from '@/lib/authSignUp';
 import { ROUTES } from '@/constants/routes';
+import { clearOppositeAuthStorage, setAuthPersistenceUseLocal } from '@/lib/authStorage';
 import { getDevMockAuth, isDevAuthBypass } from '@/lib/devAuth';
 import { ui } from '@/i18n/ui';
 import type { Academy, AuthContextType, UserProfile } from '@/types/auth';
@@ -164,7 +165,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         };
     }, []);
 
-    const signIn = async (email: string, password: string) => {
+    const signIn = async (email: string, password: string, rememberLogin = true) => {
+        setAuthPersistenceUseLocal(rememberLogin);
+        clearOppositeAuthStorage();
         const { error } = await supabase.auth.signInWithPassword({
             email,
             password,

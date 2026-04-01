@@ -10,9 +10,12 @@ import {
     Tab,
     Box,
     FormControl,
+    FormControlLabel,
     InputLabel,
     MenuItem,
     Select,
+    Switch,
+    Typography,
     useMediaQuery,
     useTheme,
 } from '@mui/material';
@@ -37,6 +40,8 @@ export interface StudentFormData {
     left_academy_date: string;
     /** 월 회비(원), 빈 문자열이면 NULL */
     monthly_fee: string;
+    /** 수정 시에만 의미 있음. 신규 등록은 항상 활성 */
+    active: boolean;
 }
 
 interface StudentFormDialogProps {
@@ -118,7 +123,6 @@ export const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 0,
-                    pt: 0,
                     overflowY: 'auto',
                     WebkitOverflowScrolling: 'touch',
                 }}
@@ -231,6 +235,48 @@ export const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
                                 helperText={ui.adminStudents.leftAcademyDateHelper}
                                 slotProps={{ inputLabel: { shrink: true } }}
                             />
+                            {editingStudent ? (
+                                <Box>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={formData.active}
+                                                onChange={(_, v) =>
+                                                    onFormChange({ ...formData, active: v })
+                                                }
+                                                color={formData.active ? 'success' : 'default'}
+                                                inputProps={{
+                                                    'aria-label': ui.adminStudents.activeStatusLabel,
+                                                }}
+                                            />
+                                        }
+                                        label={
+                                            <Typography component="span" variant="body2">
+                                                {ui.adminStudents.activeStatusLabel}
+                                                <Typography
+                                                    component="span"
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                    sx={{ ml: 1 }}
+                                                >
+                                                    (
+                                                    {formData.active
+                                                        ? ui.adminStudents.chipActive
+                                                        : ui.adminStudents.chipInactive}
+                                                    )
+                                                </Typography>
+                                            </Typography>
+                                        }
+                                    />
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{ display: 'block', pl: 0.5, mt: -0.5 }}
+                                    >
+                                        {ui.adminStudents.activeStatusHelper}
+                                    </Typography>
+                                </Box>
+                            ) : null}
                             <TextField
                                 fullWidth
                                 label={ui.adminStudents.gradeLabel}

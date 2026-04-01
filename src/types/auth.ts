@@ -22,7 +22,8 @@ export interface AuthContextType {
     academy: Academy | null;
     session: Session | null;
     loading: boolean;
-    signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+    /** `rememberLogin`: true면 브라우저를 닫아도 유지(localStorage), false면 탭 단위(sessionStorage) */
+    signIn: (email: string, password: string, rememberLogin?: boolean) => Promise<{ error: Error | null }>;
     signUp: (
         email: string,
         password: string,
