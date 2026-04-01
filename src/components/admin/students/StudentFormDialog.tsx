@@ -40,6 +40,8 @@ export interface StudentFormData {
     left_academy_date: string;
     /** 월 회비(원), 빈 문자열이면 NULL */
     monthly_fee: string;
+    /** 매월 납부일(1–31), 빈 문자열이면 NULL(가입일 일자 사용) */
+    monthly_due_day: string;
     /** 수정 시에만 의미 있음. 신규 등록은 항상 활성 */
     active: boolean;
 }
@@ -316,21 +318,35 @@ export const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} {...tabPanelProps(2)} hidden={tab !== 2}>
                     {tab === 2 ? (
-                        <TextField
-                            fullWidth
-                            type="text"
-                            label={ui.adminStudents.monthlyFeeLabel}
-                            value={formData.monthly_fee}
-                            onChange={(e) =>
-                                onFormChange({
-                                    ...formData,
-                                    monthly_fee: formatMoneyInput(e.target.value),
-                                })
-                            }
-                            helperText={ui.adminStudents.monthlyFeeHelper}
-                            slotProps={{ inputLabel: { shrink: true } }}
-                            inputProps={{ inputMode: 'numeric' }}
-                        />
+                        <>
+                            <TextField
+                                fullWidth
+                                type="text"
+                                label={ui.adminStudents.monthlyFeeLabel}
+                                value={formData.monthly_fee}
+                                onChange={(e) =>
+                                    onFormChange({
+                                        ...formData,
+                                        monthly_fee: formatMoneyInput(e.target.value),
+                                    })
+                                }
+                                helperText={ui.adminStudents.monthlyFeeHelper}
+                                slotProps={{ inputLabel: { shrink: true } }}
+                                inputProps={{ inputMode: 'numeric' }}
+                            />
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label={ui.adminStudents.monthlyDueDayLabel}
+                                value={formData.monthly_due_day}
+                                onChange={(e) =>
+                                    onFormChange({ ...formData, monthly_due_day: e.target.value })
+                                }
+                                helperText={ui.adminStudents.monthlyDueDayHelper}
+                                slotProps={{ inputLabel: { shrink: true } }}
+                                inputProps={{ inputMode: 'numeric', min: 1, max: 31 }}
+                            />
+                        </>
                     ) : null}
                 </Box>
 

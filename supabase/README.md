@@ -7,6 +7,7 @@
 
 - **신규·스테이징**: SQL Editor에서 전체 실행 가능한 구간이 많습니다 (`IF NOT EXISTS` / `CREATE OR REPLACE` 등).
 - **운영**: 검토 없이 전체를 반복 실행하지 말고, **변경된 구문만** 실행하는 것이 안전합니다.
+- **원격 DB가 `pianote.sql`보다 뒤처진 경우**: [`incremental/`](./incremental/README.md) 아래 증분 스크립트를 SQL Editor에서 실행하거나, `supabase link` 후 `npm run db:apply:monthly-due-day` 로 반영합니다.
 
 ```bash
 npm run build:sql

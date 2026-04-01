@@ -36,6 +36,15 @@ function parseMonthlyFeeInput (s: string): number | null {
     return Math.round(n);
 }
 
+/** 빈 문자열 → NULL, 1–31 → 정수, 그 외 → invalid */
+function parseMonthlyDueDayInput (s: string): { ok: true; value: number | null } | { ok: false } {
+    const t = s.trim();
+    if (!t) return { ok: true, value: null };
+    const n = Number(t);
+    if (!Number.isInteger(n) || n < 1 || n > 31) return { ok: false };
+    return { ok: true, value: n };
+}
+
 /** 학생 정보 모달 월 회비 입력란 초기 표시용 (천 단위 콤마) */
 function formatMonthlyFeeForInput (n: number): string {
     return n.toLocaleString('ko-KR');
@@ -66,6 +75,7 @@ const StudentManagement: React.FC = () => {
         enrollment_date: '',
         left_academy_date: '',
         monthly_fee: '',
+        monthly_due_day: '',
         active: true,
     });
     const [textbookCatalog, setTextbookCatalog] = useState<TextbookRow[]>([]);
@@ -152,6 +162,8 @@ const StudentManagement: React.FC = () => {
                 left_academy_date: student.left_academy_date ?? '',
                 monthly_fee:
                     student.monthly_fee != null ? formatMonthlyFeeForInput(student.monthly_fee) : '',
+                monthly_due_day:
+                    student.monthly_due_day != null ? String(student.monthly_due_day) : '',
                 active: student.active,
             });
         } else {
@@ -167,6 +179,7 @@ const StudentManagement: React.FC = () => {
                 left_academy_date: '',
                 monthly_fee:
                     academyDefaultFee != null ? formatMonthlyFeeForInput(academyDefaultFee) : '',
+                monthly_due_day: '',
                 active: true,
             });
         }
@@ -184,6 +197,7 @@ const StudentManagement: React.FC = () => {
             enrollment_date: '',
             left_academy_date: '',
             monthly_fee: '',
+            monthly_due_day: '',
             active: true,
         });
     };
@@ -213,6 +227,11 @@ const StudentManagement: React.FC = () => {
                     enqueueSnackbar(ui.adminStudents.monthlyFeeInvalid, { variant: 'warning' });
                     return;
                 }
+                const dueDayParsed = parseMonthlyDueDayInput(formData.monthly_due_day);
+                if (!dueDayParsed.ok) {
+                    enqueueSnackbar(ui.adminStudents.monthlyDueDayInvalid, { variant: 'warning' });
+                    return;
+                }
                 const result = await updateStudent(editingStudent.id, {
                     name: formData.name.trim(),
                     parent_id: null,
@@ -225,6 +244,7 @@ const StudentManagement: React.FC = () => {
                     enrollment_date: formData.enrollment_date.trim(),
                     left_academy_date: trimOrNull(formData.left_academy_date),
                     monthly_fee: parseMonthlyFeeInput(formData.monthly_fee),
+                    monthly_due_day: dueDayParsed.value,
                     active: formData.active,
                 });
                 if (result.success) {
@@ -251,6 +271,11 @@ const StudentManagement: React.FC = () => {
                     enqueueSnackbar(ui.adminStudents.monthlyFeeInvalid, { variant: 'warning' });
                     return;
                 }
+                const dueDayParsedCreate = parseMonthlyDueDayInput(formData.monthly_due_day);
+                if (!dueDayParsedCreate.ok) {
+                    enqueueSnackbar(ui.adminStudents.monthlyDueDayInvalid, { variant: 'warning' });
+                    return;
+                }
                 const parentPhoneTrimmed = formData.parent_phone.trim();
                 const result = await createStudent({
                     academy_id: academy.id,
@@ -260,6 +285,7 @@ const StudentManagement: React.FC = () => {
                     enrollment_date: formData.enrollment_date.trim(),
                     left_academy_date: trimOrNull(formData.left_academy_date),
                     monthly_fee: parseMonthlyFeeInput(formData.monthly_fee),
+                    monthly_due_day: dueDayParsedCreate.value,
                     active: true,
                     profile_image: null,
                     grade: trimOrNull(formData.grade),

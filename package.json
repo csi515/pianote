@@ -19,7 +19,8 @@
     "seed:demo": "node scripts/seed-demo.mjs",
     "build:sql": "node scripts/build-all-sql.mjs",
     "icons": "node scripts/generate-pwa-icons.mjs",
-    "supabase:config:push": "supabase config push"
+    "supabase:config:push": "supabase config push",
+    "db:apply:monthly-due-day": "npx supabase db query --linked -f supabase/incremental/monthly_due_day.sql"
   },
   "dependencies": {
     "@aldabil/react-scheduler": "^3.1.2",

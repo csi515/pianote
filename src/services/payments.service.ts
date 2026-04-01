@@ -107,6 +107,56 @@ export function dueDateForBillingMonthFromEnrollment (
     return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
+/**
+ * 청구 월의 납부 예정일. `monthlyDueDay`가 NULL이면 가입일 일자와 동일 로직.
+ * 값이 있으면 해당 일(1–31)을 그 달에 맞추고 말일로 클램프.
+ */
+export function dueDateForBillingMonth (
+    billingMonthYYYYMm: string,
+    enrollmentDate: string,
+    monthlyDueDay: number | null
+): string {
+    if (monthlyDueDay == null) {
+        return dueDateForBillingMonthFromEnrollment(enrollmentDate, billingMonthYYYYMm);
+    }
+    const dayRaw = monthlyDueDay;
+    const day =
+        Number.isFinite(dayRaw) && dayRaw >= 1 && dayRaw <= 31 ? Math.floor(Number(dayRaw)) : 1;
+    const [ys, ms] = billingMonthYYYYMm.split('-');
+    const y = Number(ys);
+    const mo = Number(ms);
+    if (!Number.isFinite(y) || !Number.isFinite(mo) || mo < 1 || mo > 12) {
+        return enrollmentDate.slice(0, 10);
+    }
+    const lastDay = new Date(y, mo, 0).getDate();
+    const d = Math.min(day, lastDay);
+    return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+/** `billing_month`(해당 월 1일) 기준으로 납부 예정일 입력 허용 구간 */
+export function isoDateRangeForBillingMonthStart (
+    billingMonthStart: string | null
+): { min: string; max: string } | null {
+    if (!billingMonthStart?.trim()) return null;
+    const d = billingMonthStart.slice(0, 10);
+    const [ys, ms] = d.split('-');
+    const y = Number(ys);
+    const mo = Number(ms);
+    if (!Number.isFinite(y) || !Number.isFinite(mo) || mo < 1 || mo > 12) return null;
+    const lastDay = new Date(y, mo, 0).getDate();
+    const min = `${y}-${String(mo).padStart(2, '0')}-01`;
+    const max = `${y}-${String(mo).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    return { min, max };
+}
+
+/** `YYYY-MM-DD` → 일(1–31). 학생 `monthly_due_day` 저장용 */
+export function dayOfMonthFromIsoDate (isoDateYmd: string): number | null {
+    if (!isoDateYmd || isoDateYmd.length < 10) return null;
+    const d = parseInt(isoDateYmd.slice(8, 10), 10);
+    if (!Number.isFinite(d) || d < 1 || d > 31) return null;
+    return d;
+}
+
 /** 월 회비·직전 청구가 없을 때 자동 생성 금액(원) */
 export const FALLBACK_MONTHLY_FEE_AMOUNT = 100000;
 
@@ -364,7 +414,7 @@ export const createPayment = async (
 };
 
 /**
- * 해당 청구 월에 결제 행이 없는 학생에게 자동 등록(납부 예정일 = 가입일의 일자).
+ * 해당 청구 월에 결제 행이 없는 학생에게 자동 등록(납부 예정일 = 학생 `monthly_due_day` 또는 가입일 일자).
  * 금액: 학생 monthly_fee → 직전 청구 금액 → FALLBACK_MONTHLY_FEE_AMOUNT
  */
 export async function ensureMonthlyPaymentsForBillingMonth (
@@ -393,7 +443,11 @@ export async function ensureMonthlyPaymentsForBillingMonth (
         let created = 0;
 
         for (const s of missing) {
-            const dueDate = dueDateForBillingMonthFromEnrollment(s.enrollment_date, billingMonthYYYYMm);
+            const dueDate = dueDateForBillingMonth(
+                billingMonthYYYYMm,
+                s.enrollment_date,
+                s.monthly_due_day ?? null
+            );
             const amount =
                 s.monthly_fee ??
                 latestAmounts.get(s.id) ??

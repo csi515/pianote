@@ -148,6 +148,7 @@ export type ActiveStudentSummary = {
     enrollment_date: string;
     left_academy_date: string | null;
     monthly_fee: number | null;
+    monthly_due_day: number | null;
 };
 
 export const listActiveStudentSummaries = async (
@@ -156,7 +157,7 @@ export const listActiveStudentSummaries = async (
     try {
         const { data, error } = await supabase
             .from('students')
-            .select('id, name, enrollment_date, left_academy_date, monthly_fee')
+            .select('id, name, enrollment_date, left_academy_date, monthly_fee, monthly_due_day')
             .eq('academy_id', academyId)
             .eq('active', true)
             .order('name', { ascending: true });
@@ -168,6 +169,7 @@ export const listActiveStudentSummaries = async (
             enrollment_date: r.enrollment_date as string,
             left_academy_date: r.left_academy_date ?? null,
             monthly_fee: r.monthly_fee ?? null,
+            monthly_due_day: r.monthly_due_day ?? null,
         }));
     } catch (e) {
         console.error('listActiveStudentSummaries:', e);

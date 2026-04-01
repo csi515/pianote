@@ -6,3 +6,5 @@
 
 1. **Supabase Dashboard → SQL Editor** — 변경 블록 또는 전체(신규 프로젝트·검토 후) 실행  
 2. **Supabase CLI** — 프로젝트를 `supabase link` 한 뒤 `supabase db query --linked -f ../pianote.sql` 등 (대용량·운영은 블록 단위 권장)
+
+원격 DB에 **누락분만** 맞출 때는 [`../incremental/README.md`](../incremental/README.md) 참고.

@@ -31,13 +31,16 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useSnackbar } from 'notistack';
 import type { ActiveStudentSummary } from '@/services/students.service';
+import { updateStudent } from '@/services/students.service';
 import {
     createPayment,
     updatePayment,
     toBillingMonthStart,
     shiftMonth,
     lastDayOfMonthYYYYMm,
-    dueDateForBillingMonthFromEnrollment,
+    dueDateForBillingMonth,
+    dayOfMonthFromIsoDate,
+    isoDateRangeForBillingMonthStart,
     formatBillingMonthLabelKo,
     parseYearMonth,
     buildBillingYearOptions,
@@ -58,6 +61,7 @@ import {
     touchIconButtonSx,
 } from '@/constants/touch';
 import { PaymentPaidDateCell } from '@/pages/admin/payments/PaymentPaidDateCell';
+import { PaymentDueDateCell } from '@/pages/admin/payments/PaymentDueDateCell';
 
 type PayStatus = Database['public']['Tables']['payments']['Row']['status'];
 
@@ -161,7 +165,11 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
             student_id: studentId,
             amount: st?.monthly_fee != null ? String(st.monthly_fee) : fallback,
             due_date: st
-                ? dueDateForBillingMonthFromEnrollment(st.enrollment_date, billingMonthInput)
+                ? dueDateForBillingMonth(
+                      billingMonthInput,
+                      st.enrollment_date,
+                      st.monthly_due_day ?? null
+                  )
                 : lastDayOfMonthYYYYMm(billingMonthInput),
             status: 'pending',
         });
@@ -172,6 +180,14 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
         const amt = Number(monthlyForm.amount.replaceAll(',', '').trim());
         if (!monthlyForm.student_id || !monthlyForm.due_date || Number.isNaN(amt) || amt <= 0) {
             enqueueSnackbar(ui.adminPayments.warnCreateMonthly, { variant: 'warning' });
+            return;
+        }
+        const dr = isoDateRangeForBillingMonthStart(toBillingMonthStart(billingMonthInput));
+        if (
+            dr &&
+            (monthlyForm.due_date < dr.min || monthlyForm.due_date > dr.max)
+        ) {
+            enqueueSnackbar(ui.adminPayments.dueDateOutOfRange, { variant: 'warning' });
             return;
         }
         const today = new Date().toISOString().slice(0, 10);
@@ -218,6 +234,43 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
             enqueueSnackbar(res.error ?? ui.adminPayments.toastFailed, { variant: 'error' });
         }
     };
+
+    const commitDueDate = async (
+        r: PaymentWithStudent,
+        isoDate: string,
+        applyMonthlyDueDay: boolean
+    ) => {
+        const range = isoDateRangeForBillingMonthStart(r.billing_month);
+        if (range && (isoDate < range.min || isoDate > range.max)) {
+            enqueueSnackbar(ui.adminPayments.dueDateOutOfRange, { variant: 'warning' });
+            return;
+        }
+        setTogglingPaymentId(r.id);
+        const payRes = await updatePayment(r.id, { due_date: isoDate });
+        if (!payRes.success) {
+            setTogglingPaymentId(null);
+            enqueueSnackbar(payRes.error ?? ui.adminPayments.toastFailed, { variant: 'error' });
+            return;
+        }
+        if (applyMonthlyDueDay) {
+            const day = dayOfMonthFromIsoDate(isoDate);
+            if (day != null) {
+                const stRes = await updateStudent(r.student_id, { monthly_due_day: day });
+                if (!stRes.success) {
+                    enqueueSnackbar(ui.adminPayments.dueDateStudentDefaultSaveFailed, {
+                        variant: 'warning',
+                    });
+                }
+            }
+        }
+        setTogglingPaymentId(null);
+        enqueueSnackbar(ui.adminPayments.toastChanged, { variant: 'success' });
+        await onAfterMutation();
+    };
+
+    const registerDueDateRange = isoDateRangeForBillingMonthStart(
+        toBillingMonthStart(billingMonthInput)
+    );
 
     return (
         <>
@@ -356,7 +409,11 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                                                                 </Typography>
                                                             </InfoRow>
                                                             <InfoRow label={ui.adminPayments.dueDate}>
-                                                                <Typography variant="body2">{r.due_date}</Typography>
+                                                                <PaymentDueDateCell
+                                                                    row={r}
+                                                                    disabled={togglingPaymentId === r.id}
+                                                                    onDueDateCommit={commitDueDate}
+                                                                />
                                                             </InfoRow>
                                                             <InfoRow label={ui.adminPayments.paidDate}>
                                                                 <PaymentPaidDateCell
@@ -427,7 +484,13 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                                             {r ? (
                                                 <>
                                                     <TableCell align="right">{r.amount.toLocaleString()}</TableCell>
-                                                    <TableCell>{r.due_date}</TableCell>
+                                                    <TableCell>
+                                                        <PaymentDueDateCell
+                                                            row={r}
+                                                            disabled={togglingPaymentId === r.id}
+                                                            onDueDateCommit={commitDueDate}
+                                                        />
+                                                    </TableCell>
                                                     <TableCell>
                                                         <PaymentPaidDateCell
                                                             row={r}
@@ -549,6 +612,11 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                         slotProps={{ inputLabel: { shrink: true } }}
                         fullWidth
                         required
+                        inputProps={
+                            registerDueDateRange
+                                ? { min: registerDueDateRange.min, max: registerDueDateRange.max }
+                                : undefined
+                        }
                     />
                     <FormControl fullWidth>
                         <InputLabel>{ui.adminPayments.status}</InputLabel>

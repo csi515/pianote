@@ -66,6 +66,8 @@ export interface Database {
                     left_academy_date: string | null;
                     /** 월 회비(원). NULL이면 자동 청구 시 직전 금액·기본값 */
                     monthly_fee: number | null;
+                    /** 매월 납부 예정일(1–31). NULL이면 가입일 일자 사용 */
+                    monthly_due_day: number | null;
                     active: boolean;
                     profile_image: string | null;
                     /** 보호자 연락처(전화번호 문자열) */
@@ -81,11 +83,12 @@ export interface Database {
                 };
                 Insert: Omit<
                     Database['public']['Tables']['students']['Row'],
-                    'id' | 'user_id' | 'attendance_pin' | 'created_at'
+                    'id' | 'user_id' | 'attendance_pin' | 'created_at' | 'monthly_due_day'
                 > & {
                     user_id?: string | null;
                     attendance_pin?: string | null;
                     curriculum_track_id?: string | null;
+                    monthly_due_day?: number | null;
                 };
                 Update: Partial<Database['public']['Tables']['students']['Insert']>;
                 Relationships: [];

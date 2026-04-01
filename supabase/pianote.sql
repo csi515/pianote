@@ -1321,6 +1321,21 @@ COMMENT ON COLUMN public.students.attendance_pin IS '등하원 매칭용 8자리
 CREATE INDEX IF NOT EXISTS idx_students_attendance_pin ON public.students (attendance_pin)
     WHERE attendance_pin IS NOT NULL;
 
+-- 매월 납부 예정일(일). NULL이면 가입일 enrollment_date의 일자를 월별 자동 청구에 사용
+ALTER TABLE public.students
+    ADD COLUMN IF NOT EXISTS monthly_due_day integer NULL;
+
+ALTER TABLE public.students
+    DROP CONSTRAINT IF EXISTS students_monthly_due_day_range;
+
+ALTER TABLE public.students
+    ADD CONSTRAINT students_monthly_due_day_range CHECK (
+        monthly_due_day IS NULL
+        OR (monthly_due_day >= 1 AND monthly_due_day <= 31)
+    );
+
+COMMENT ON COLUMN public.students.monthly_due_day IS '월 회비 납부 예정일(1–31). NULL이면 가입일 일자 사용';
+
 
 -- =============================================================================
 -- 학생 프로필: 학년·특징·진도 요약 (운영 DB에는 동일 ALTER 적용)
