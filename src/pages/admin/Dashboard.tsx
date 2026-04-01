@@ -18,7 +18,7 @@ interface DashboardStats {
 
 const AdminDashboard: React.FC = () => {
     const { academy } = useAuth();
-    usePageTopBar({ title: d.pageTitle, backTo: null });
+    usePageTopBar({ title: d.pageTitle });
     const [stats, setStats] = useState<DashboardStats>({
         totalStudents: 0,
         overduePayments: 0,
@@ -67,7 +67,7 @@ const AdminDashboard: React.FC = () => {
                             {d.statTotalStudents}
                         </Typography>
                         <Typography variant="h4" fontWeight="bold" color="primary">
-                            {loading ? d.loadingEllipsis : `${stats.totalStudents}${d.countUnit}`}
+                            {loading ? ui.common.loading : `${stats.totalStudents}${d.countUnit}`}
                         </Typography>
                     </Paper>
                 </Grid>
@@ -79,7 +79,7 @@ const AdminDashboard: React.FC = () => {
                         </Typography>
                         <Typography variant="h4" fontWeight="bold" color="error.main">
                             {loading
-                                ? d.loadingEllipsis
+                                ? ui.common.loading
                                 : `${stats.overduePayments}${d.countUnitCases}`}
                         </Typography>
                     </Paper>
@@ -93,7 +93,7 @@ const AdminDashboard: React.FC = () => {
                             </Typography>
                             <Typography variant="h4" fontWeight="bold" color="warning.main">
                                 {loading
-                                    ? d.loadingEllipsis
+                                    ? ui.common.loading
                                     : `${stats.textbookFeeUnpaidStudents}${d.countUnit}`}
                             </Typography>
                         </Paper>

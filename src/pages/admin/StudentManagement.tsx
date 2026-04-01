@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Container } from '@mui/material';
-import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTopBar } from '@/contexts/PageTopBarContext';
 import { useSnackbar } from 'notistack';
 import {
     getStudentsPageWithTextbookPaymentStatuses,
-    getAcademyStudentStats,
     createStudent,
     updateStudent,
     deleteStudent,
     type StudentWithParent,
-    type AcademyStudentStats,
 } from '@/services/students.service';
 import {
     getStudentTextbookPaymentStatuses,
@@ -51,14 +48,10 @@ function defaultEnrollmentDateYmd (): string {
 
 const StudentManagement: React.FC = () => {
     const { academy } = useAuth();
-    usePageTopBar({ title: ui.adminStudents.pageTitle, backTo: ROUTES.admin.dashboard });
+    usePageTopBar({ title: ui.adminStudents.pageTitle });
     const { enqueueSnackbar } = useSnackbar();
 
     const [students, setStudents] = useState<StudentWithParent[]>([]);
-    const [studentStats, setStudentStats] = useState<AcademyStudentStats>({
-        total: 0,
-        active: 0,
-    });
     const [totalCount, setTotalCount] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -94,14 +87,14 @@ const StudentManagement: React.FC = () => {
         if (!academy) return;
         setLoading(true);
         try {
-            const [pageResult, stats] = await Promise.all([
-                getStudentsPageWithTextbookPaymentStatuses(academy.id, page, rowsPerPage),
-                getAcademyStudentStats(academy.id),
-            ]);
+            const pageResult = await getStudentsPageWithTextbookPaymentStatuses(
+                academy.id,
+                page,
+                rowsPerPage
+            );
             setStudents(pageResult.rows);
             setTotalCount(pageResult.total);
             setTextbookPaymentByStudent(pageResult.textbookPaymentByStudent);
-            setStudentStats(stats);
             if (pageResult.rows.length === 0 && page > 0) {
                 setPage((p) => Math.max(0, p - 1));
             }
@@ -310,10 +303,6 @@ const StudentManagement: React.FC = () => {
         [academy?.id, enqueueSnackbar, loadStudentsPage]
     );
 
-    const infoBody = ui.adminStudents.infoSummary
-        .replace('{active}', String(studentStats.active))
-        .replace('{total}', String(studentStats.total));
-
     if (!academy) {
         return (
             <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3 } }}>
@@ -326,10 +315,6 @@ const StudentManagement: React.FC = () => {
 
     return (
         <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3 } }}>
-            <Alert severity="info" sx={{ mb: 3 }} role="status" aria-live="polite">
-                {infoBody}
-            </Alert>
-
             <StudentManagementTable
                 students={students}
                 textbookPaymentByStudent={textbookPaymentByStudent}

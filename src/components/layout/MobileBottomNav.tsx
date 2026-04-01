@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, ButtonBase, Paper, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, BottomNavigation, BottomNavigationAction, Paper, useMediaQuery, useTheme } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ui } from '@/i18n/ui';
 import { ROUTES } from '@/constants/routes';
@@ -14,7 +14,7 @@ import { usePlatformAdmin } from '@/hooks/usePlatformAdmin';
 
 type BottomItem = SidebarNavItem & { shortLabel: string };
 
-function shortLabelForPath(path: string): string {
+function shortLabelForPath (path: string): string {
     const l = ui.layout.mobileBottomNav;
     switch (path) {
         case ROUTES.admin.dashboard:
@@ -35,11 +35,11 @@ function shortLabelForPath(path: string): string {
 }
 
 /**
- * sm 미만(폰)에서만 표시. 태블릿·데스크톱은 사이드바만 사용.
+ * md 미만: 하단 고정 BottomNavigation. md 이상은 permanent Drawer만 사용(중복 제거).
  */
-export function MobileBottomNav() {
+export function MobileBottomNav () {
     const theme = useTheme();
-    const isPhone = useMediaQuery(theme.breakpoints.down('sm'));
+    const isBelowMd = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
     const location = useLocation();
     const navigate = useNavigate();
     const { isPlatformAdmin } = usePlatformAdmin();
@@ -62,7 +62,12 @@ export function MobileBottomNav() {
         return academy;
     }, [location.pathname, isPlatformAdmin]);
 
-    if (!isPhone) return null;
+    const value = useMemo(() => {
+        const i = items.findIndex((item) => item.path === location.pathname);
+        return i >= 0 ? i : false;
+    }, [items, location.pathname]);
+
+    if (!isBelowMd) return null;
 
     return (
         <Paper
@@ -78,51 +83,56 @@ export function MobileBottomNav() {
                 zIndex: theme.zIndex.appBar - 1,
                 borderTop: 1,
                 borderColor: 'divider',
-                pb: 'env(safe-area-inset-bottom)',
+                boxSizing: 'border-box',
+                pb: 'env(safe-area-inset-bottom, 0px)',
             }}
         >
+            {/** 항목 많을 때(플랫폼+학원) 좁은 폭에서 가로 스크롤 */}
             <Box
                 sx={{
-                    display: 'flex',
-                    alignItems: 'stretch',
-                    justifyContent: 'stretch',
-                    minHeight: MOBILE_BOTTOM_NAV_INNER_HEIGHT_PX,
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
                 }}
             >
-                {items.map((item) => {
-                    const selected = location.pathname === item.path;
-                    return (
-                        <Box key={item.path} sx={{ flex: 1, minWidth: 0 }}>
-                            <ButtonBase
-                                focusRipple
-                                onClick={() => navigate(item.path)}
-                                sx={{
-                                    width: '100%',
-                                    minHeight: MIN_TOUCH_TARGET_PX,
-                                    py: 0.75,
-                                    px: 0.25,
-                                    flexDirection: 'column',
-                                    gap: 0.25,
-                                    color: selected ? 'primary.main' : 'text.secondary',
-                                }}
-                            >
-                                <item.Icon sx={{ fontSize: 22 }} aria-hidden />
-                                <Typography
-                                    variant="caption"
-                                    component="span"
-                                    noWrap
-                                    sx={{
-                                        fontSize: '0.65rem',
-                                        fontWeight: selected ? 600 : 400,
-                                        lineHeight: 1.1,
-                                    }}
-                                >
-                                    {item.shortLabel}
-                                </Typography>
-                            </ButtonBase>
-                        </Box>
-                    );
-                })}
+                <BottomNavigation
+                    value={value}
+                    showLabels
+                    onChange={(_, newValue) => {
+                        const item = items[newValue];
+                        if (item) navigate(item.path);
+                    }}
+                    sx={{
+                        minHeight: MOBILE_BOTTOM_NAV_INNER_HEIGHT_PX,
+                        width: 'max-content',
+                        minWidth: '100%',
+                        bgcolor: 'background.paper',
+                        '& .MuiBottomNavigationAction-root': {
+                            flex: '0 0 auto',
+                            minWidth: 64,
+                            maxWidth: 'none',
+                            minHeight: MIN_TOUCH_TARGET_PX,
+                            py: 0.5,
+                            px: 0.25,
+                        },
+                        '& .MuiBottomNavigationAction-label': {
+                            fontSize: '0.65rem',
+                            lineHeight: 1.1,
+                            opacity: 1,
+                            '&.Mui-selected': { fontSize: '0.65rem' },
+                        },
+                    }}
+                >
+                    {items.map((item) => (
+                        <BottomNavigationAction
+                            key={item.path}
+                            label={item.shortLabel}
+                            icon={<item.Icon sx={{ fontSize: 22 }} aria-hidden />}
+                            aria-label={`${item.text} ${item.shortLabel}`}
+                        />
+                    ))}
+                </BottomNavigation>
             </Box>
         </Paper>
     );

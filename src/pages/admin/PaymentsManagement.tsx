@@ -5,7 +5,6 @@ import {
     Button,
     Container,
     Paper,
-    Alert,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -31,7 +30,6 @@ import {
     useTheme,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTopBar } from '@/contexts/PageTopBarContext';
 import { useSnackbar } from 'notistack';
@@ -58,7 +56,7 @@ import {
     MobileCardListItem,
     MobileStackedCard,
 } from '@/components/common/adminTable';
-import { tablePaginationTouchSx, touchButtonSx } from '@/constants/touch';
+import { tableContainerTouchScrollSx, tablePaginationTouchSx, touchButtonSx } from '@/constants/touch';
 
 type PayStatus = Database['public']['Tables']['payments']['Row']['status'];
 
@@ -76,10 +74,10 @@ function PaymentsInfoRow ({ label, children }: { label: string; children: React.
 const PaymentsManagement: React.FC = () => {
     const paymentDialogTitleId = useId();
     const theme = useTheme();
-    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobileList = useMediaQuery(theme.breakpoints.down('md'));
 
     const { academy } = useAuth();
-    usePageTopBar({ title: ui.adminPayments.title, backTo: ROUTES.admin.dashboard });
+    usePageTopBar({ title: ui.adminPayments.title });
     const { enqueueSnackbar } = useSnackbar();
     const [tab, setTab] = useState(0);
     const [billingMonthInput, setBillingMonthInput] = useState(() => formatMonthInput(new Date()));
@@ -261,9 +259,6 @@ const PaymentsManagement: React.FC = () => {
 
             {tab === 1 && (
                 <>
-                    <Alert severity="info" sx={{ mb: 2 }} role="status" aria-live="polite">
-                        {ui.adminPayments.allTabHint}
-                    </Alert>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
                         <Button
                             variant="contained"
@@ -275,19 +270,9 @@ const PaymentsManagement: React.FC = () => {
                             {ui.adminPayments.add}
                         </Button>
                     </Box>
-                    {!loading && students.length === 0 ? (
-                        <Alert severity="warning" sx={{ mb: 2 }} role="status" aria-live="polite">
-                            {ui.adminPayments.noStudentsForPayments}
-                        </Alert>
-                    ) : null}
-                    {!loading && totalAll === 0 && students.length > 0 ? (
-                        <Alert severity="info" sx={{ mb: 2 }} role="status" aria-live="polite">
-                            {ui.adminPayments.emptyAllListHint}
-                        </Alert>
-                    ) : null}
                     {isMobileList ? (
-                        <Paper variant="outlined">
-                            <Box sx={{ p: 2 }}>
+                        <Paper variant="outlined" sx={{ borderRadius: { xs: 0, sm: 1 }, overflow: 'hidden' }}>
+                            <Box sx={{ px: { xs: 0, sm: 2 }, py: { xs: 0, sm: 2 } }}>
                                 {loading ? (
                                     <Typography color="text.secondary" textAlign="center" py={3}>
                                         {ui.common.loading}
@@ -369,13 +354,13 @@ const PaymentsManagement: React.FC = () => {
                                 rowsPerPageOptions={[5, 10, 25, 50]}
                                 labelRowsPerPage={ui.pagination.labelRowsPerPage}
                                 labelDisplayedRows={({ from, to, count }) =>
-                                    count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                    count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                                 }
                                 sx={tablePaginationTouchSx}
                             />
                         </Paper>
                     ) : (
-                        <TableContainer component={Paper} variant="outlined">
+                        <TableContainer component={Paper} variant="outlined" sx={tableContainerTouchScrollSx}>
                             <Table size="small" aria-label={ui.adminPayments.tableAriaLabelAll}>
                                 <TableHead>
                                     <TableRow>
@@ -449,7 +434,7 @@ const PaymentsManagement: React.FC = () => {
                                 rowsPerPageOptions={[5, 10, 25, 50]}
                                 labelRowsPerPage={ui.pagination.labelRowsPerPage}
                                 labelDisplayedRows={({ from, to, count }) =>
-                                    count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                    count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                                 }
                                 sx={tablePaginationTouchSx}
                             />

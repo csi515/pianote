@@ -33,7 +33,7 @@ export const TextbookCatalogSortableItem: React.FC<TextbookCatalogSortableItemPr
     reorderDisabled = false,
 }) => {
     const theme = useTheme();
-    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobileList = useMediaQuery(theme.breakpoints.down('md'));
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: row.id,
         disabled: reorderDisabled,

@@ -11,7 +11,7 @@ import type { SxProps, Theme } from '@mui/material/styles';
 import type { TableProps } from '@mui/material/Table';
 import type { TablePaginationProps } from '@mui/material/TablePagination';
 import visuallyHidden from '@mui/utils/visuallyHidden';
-import { tablePaginationTouchSx } from '@/constants/touch';
+import { tableContainerTouchScrollSx, tablePaginationTouchSx } from '@/constants/touch';
 import { ui } from '@/i18n/ui';
 
 /**
@@ -31,7 +31,11 @@ export type AdminTableSurfaceProps = {
 
 /** Paper(outlined) + TableContainer — 내부에 Table과 TablePagination을 함께 둘 수 있음 */
 export const AdminTableSurface: React.FC<AdminTableSurfaceProps> = ({ children, sx }) => (
-    <TableContainer component={Paper} variant="outlined" sx={{ width: '100%', ...sx }}>
+    <TableContainer
+        component={Paper}
+        variant="outlined"
+        sx={{ ...tableContainerTouchScrollSx, ...sx }}
+    >
         {children}
     </TableContainer>
 );
@@ -90,11 +94,12 @@ export const AdminTableReorderHeaderCell: React.FC<AdminTableReorderHeaderCellPr
 );
 
 /** 목록 하단 `1-10 / 100` 형식 (프로젝트 공통) */
+/** MUI TablePagination이 넘기는 from·to는 이미 1-based(첫·마지막 행 번호) */
 export const defaultAdminTableLabelDisplayedRows: TablePaginationProps['labelDisplayedRows'] = ({
     from,
     to,
     count,
-}) => (count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`);
+}) => (count === 0 ? '0 / 0' : `${from}-${to} / ${count}`);
 
 export type AdminTablePaginationBarProps = {
     count: number;

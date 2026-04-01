@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import { MOBILE_GUTTER_PX } from '@/constants/layout';
 import { MIN_TOUCH_TARGET_PX } from '@/constants/touch';
 
 /** 학원·가정 모두 읽기 편한 따뜻한 톤 (과한 채도·날카로운 네이비 지양) */
@@ -313,8 +314,12 @@ export const theme = createTheme({
     MuiContainer: {
       styleOverrides: {
         root: ({ theme }) => ({
-          paddingLeft: 'max(16px, env(safe-area-inset-left))',
-          paddingRight: 'max(16px, env(safe-area-inset-right))',
+          paddingLeft: `max(${MOBILE_GUTTER_PX}px, env(safe-area-inset-left))`,
+          paddingRight: `max(${MOBILE_GUTTER_PX}px, env(safe-area-inset-right))`,
+          [theme.breakpoints.down('sm')]: {
+            maxWidth: '100%',
+            width: '100%',
+          },
           [theme.breakpoints.between('sm', 'lg')]: {
             paddingLeft: `max(${theme.spacing(2.5)}, env(safe-area-inset-left))`,
             paddingRight: `max(${theme.spacing(2.5)}, env(safe-area-inset-right))`,

@@ -33,7 +33,7 @@ import {
     MobileCardListItem,
     MobileStackedCard,
 } from '@/components/common/adminTable';
-import { MIN_TOUCH_TARGET_PX, touchIconButtonSx } from '@/constants/touch';
+import { MIN_TOUCH_TARGET_PX, tableContainerTouchScrollSx, touchIconButtonSx } from '@/constants/touch';
 
 function memoPreviewText (memo: string | null | undefined): string {
     const t = memo?.trim();
@@ -69,6 +69,33 @@ function FieldRow ({ label, value }: { label: string; value: React.ReactNode }) 
     );
 }
 
+/** 테이블·카드 공통: 이름 옆에 작은 활성/비활성 문구 */
+function StudentNameWithStatus ({
+    student,
+    nameVariant = 'body2',
+}: {
+    student: StudentWithParent;
+    nameVariant?: 'body2' | 'subtitle1';
+}) {
+    const statusLabel = student.active ? ui.adminStudents.chipActive : ui.adminStudents.chipInactive;
+    return (
+        <Stack direction="row" alignItems="baseline" spacing={0.75} flexWrap="wrap" component="span">
+            <Typography component="span" variant={nameVariant} fontWeight={600}>
+                {student.name}
+            </Typography>
+            <Typography
+                component="span"
+                variant="caption"
+                color={student.active ? 'success.main' : 'text.secondary'}
+                sx={{ fontSize: '0.7rem', lineHeight: 1.2 }}
+                aria-label={`${student.name} ${statusLabel}`}
+            >
+                {statusLabel}
+            </Typography>
+        </Stack>
+    );
+}
+
 export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
     students,
     textbookPaymentByStudent,
@@ -84,7 +111,7 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
     onAddStudent,
 }) => {
     const theme = useTheme();
-    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobileList = useMediaQuery(theme.breakpoints.down('md'));
 
     const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
     const [menuStudent, setMenuStudent] = useState<StudentWithParent | null>(null);
@@ -99,7 +126,7 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
         setMenuStudent(null);
     };
 
-    const colSpan = 9;
+    const colSpan = 7;
 
     /** 교재비 열: TEXTBOOK_FEES / TERMINOLOGY 와 같이 활성 학생만 none/paid/unpaid. 비활성은 집계 제외(—). */
     const renderTextbookFeeCell = (student: StudentWithParent) => {
@@ -190,9 +217,9 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                 }
             >
                 <Stack spacing={1.25}>
-                    <Typography variant="subtitle1" fontWeight={600} component="h3">
-                        {student.name}
-                    </Typography>
+                    <Box component="h3" sx={{ m: 0 }}>
+                        <StudentNameWithStatus student={student} nameVariant="subtitle1" />
+                    </Box>
                     <FieldRow
                         label={ui.adminStudents.tableColGrade}
                         value={student.grade?.trim() ? student.grade : '—'}
@@ -203,30 +230,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                         value={student.parent_phone?.trim() ? student.parent_phone : '—'}
                     />
                     <FieldRow label={ui.adminStudents.tableColEnrollment} value={student.enrollment_date} />
-                    <FieldRow
-                        label={ui.adminStudents.tableColLeftAcademy}
-                        value={student.left_academy_date?.trim() ? student.left_academy_date : '—'}
-                    />
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                        <Typography variant="caption" color="text.secondary">
-                            {ui.adminStudents.tableColStatus}
-                        </Typography>
-                        {student.active ? (
-                            <Chip
-                                label={ui.adminStudents.chipActive}
-                                color="success"
-                                size="small"
-                                aria-label={`${student.name} ${ui.adminStudents.chipActive}`}
-                            />
-                        ) : (
-                            <Chip
-                                label={ui.adminStudents.chipInactive}
-                                color="default"
-                                size="small"
-                                aria-label={`${student.name} ${ui.adminStudents.chipInactive}`}
-                            />
-                        )}
-                    </Stack>
                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                         <Tooltip title={ui.adminStudents.tableColTextbookFeeHint}>
                             <Typography variant="caption" color="text.secondary" component="span">
@@ -265,11 +268,12 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                 sx={{
                     minWidth: { xs: '100%', sm: 'auto' },
                     overflow: 'hidden',
+                    borderRadius: { xs: 0, sm: 1 },
                 }}
             >
                 {isMobileList ? (
                     <>
-                        <Box sx={{ p: 2 }}>
+                        <Box sx={{ px: { xs: 0, sm: 2 }, py: { xs: 0, sm: 2 } }}>
                             {loading ? (
                                 <Typography color="text.secondary" textAlign="center" py={3}>
                                     {ui.common.loading}
@@ -295,12 +299,7 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                     </>
                 ) : (
                     <>
-                        <TableContainer
-                            sx={{
-                                overflow: 'auto',
-                                WebkitOverflowScrolling: 'touch',
-                            }}
-                        >
+                        <TableContainer sx={tableContainerTouchScrollSx}>
                             <Table
                                 size="small"
                                 aria-label={ui.adminStudents.tableAriaLabel}
@@ -319,8 +318,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                                         </TableCell>
                                         <TableCell>{ui.adminStudents.tableColParent}</TableCell>
                                         <TableCell>{ui.adminStudents.tableColEnrollment}</TableCell>
-                                        <TableCell>{ui.adminStudents.tableColLeftAcademy}</TableCell>
-                                        <TableCell>{ui.adminStudents.tableColStatus}</TableCell>
                                         <TableCell>
                                             <Tooltip title={ui.adminStudents.tableColTextbookFeeHint}>
                                                 <span>{ui.adminStudents.tableColTextbookFee}</span>
@@ -337,7 +334,9 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                                     ) : (
                                         students.map((student) => (
                                             <TableRow key={student.id} hover>
-                                                <TableCell>{student.name}</TableCell>
+                                                <TableCell>
+                                                    <StudentNameWithStatus student={student} />
+                                                </TableCell>
                                                 <TableCell>{student.grade?.trim() ? student.grade : '—'}</TableCell>
                                                 <TableCell
                                                     sx={{
@@ -354,28 +353,6 @@ export const StudentManagementTable: React.FC<StudentManagementTableProps> = ({
                                                     {student.parent_phone?.trim() ? student.parent_phone : '—'}
                                                 </TableCell>
                                                 <TableCell>{student.enrollment_date}</TableCell>
-                                                <TableCell>
-                                                    {student.left_academy_date?.trim()
-                                                        ? student.left_academy_date
-                                                        : '—'}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {student.active ? (
-                                                        <Chip
-                                                            label={ui.adminStudents.chipActive}
-                                                            color="success"
-                                                            size="small"
-                                                            aria-label={`${student.name} ${ui.adminStudents.chipActive}`}
-                                                        />
-                                                    ) : (
-                                                        <Chip
-                                                            label={ui.adminStudents.chipInactive}
-                                                            color="default"
-                                                            size="small"
-                                                            aria-label={`${student.name} ${ui.adminStudents.chipInactive}`}
-                                                        />
-                                                    )}
-                                                </TableCell>
                                                 <TableCell>{renderTextbookFeeCell(student)}</TableCell>
                                                 <TableCell align="right">
                                                     <Tooltip title={ui.adminStudents.manage}>

@@ -9,6 +9,10 @@ import {
     Tabs,
     Tab,
     Box,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
     useMediaQuery,
     useTheme,
 } from '@mui/material';
@@ -66,8 +70,17 @@ export const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
     onStudentTextbooksChanged,
 }) => {
     const theme = useTheme();
-    const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
+    const isBelowMd = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
     const [tab, setTab] = useState(0);
+
+    const tabLabels = [
+        ui.adminStudents.dialogTabBasic,
+        ui.adminStudents.dialogTabContactMemo,
+        ui.adminStudents.dialogTabBilling,
+        ui.adminStudents.dialogTabTextbooks,
+        ui.adminStudents.dialogTabMedia,
+        ui.adminStudents.dialogTabConsultations,
+    ];
 
     useEffect(() => {
         if (open) setTab(0);
@@ -110,61 +123,82 @@ export const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
                     WebkitOverflowScrolling: 'touch',
                 }}
             >
-                <Tabs
-                    value={tab}
-                    onChange={(_, v) => setTab(v)}
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    aria-label={ui.adminStudents.dialogTabsAriaLabel}
-                    allowScrollButtonsMobile
-                    sx={{
-                        borderBottom: 1,
-                        borderColor: 'divider',
-                        mb: 2,
-                        minHeight: MIN_TOUCH_TARGET_PX,
-                        '& .MuiTabScrollButton-root': {
-                            minWidth: MIN_TOUCH_TARGET_PX,
+                {isBelowMd ? (
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel id="student-form-section-label" shrink>
+                            {ui.adminStudents.dialogSectionSelectLabel}
+                        </InputLabel>
+                        <Select
+                            labelId="student-form-section-label"
+                            value={tab}
+                            label={ui.adminStudents.dialogSectionSelectLabel}
+                            onChange={(e) => setTab(Number(e.target.value))}
+                            sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
+                        >
+                            {tabLabels.map((label, i) => (
+                                <MenuItem key={`student-form-tab-opt-${i}`} value={i}>
+                                    {label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                ) : (
+                    <Tabs
+                        value={tab}
+                        onChange={(_, v) => setTab(v)}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        aria-label={ui.adminStudents.dialogTabsAriaLabel}
+                        allowScrollButtonsMobile
+                        sx={{
+                            borderBottom: 1,
+                            borderColor: 'divider',
+                            mb: 2,
                             minHeight: MIN_TOUCH_TARGET_PX,
-                        },
-                    }}
-                >
-                    <Tab
-                        label={ui.adminStudents.dialogTabBasic}
-                        id="student-form-tab-label-0"
-                        aria-controls="student-form-tab-0"
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    />
-                    <Tab
-                        label={ui.adminStudents.dialogTabContactMemo}
-                        id="student-form-tab-label-1"
-                        aria-controls="student-form-tab-1"
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    />
-                    <Tab
-                        label={ui.adminStudents.dialogTabBilling}
-                        id="student-form-tab-label-2"
-                        aria-controls="student-form-tab-2"
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    />
-                    <Tab
-                        label={ui.adminStudents.dialogTabTextbooks}
-                        id="student-form-tab-label-3"
-                        aria-controls="student-form-tab-3"
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    />
-                    <Tab
-                        label={ui.adminStudents.dialogTabMedia}
-                        id="student-form-tab-label-4"
-                        aria-controls="student-form-tab-4"
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    />
-                    <Tab
-                        label={ui.adminStudents.dialogTabConsultations}
-                        id="student-form-tab-label-5"
-                        aria-controls="student-form-tab-5"
-                        sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
-                    />
-                </Tabs>
+                            '& .MuiTabScrollButton-root': {
+                                minWidth: MIN_TOUCH_TARGET_PX,
+                                minHeight: MIN_TOUCH_TARGET_PX,
+                            },
+                        }}
+                    >
+                        <Tab
+                            label={ui.adminStudents.dialogTabBasic}
+                            id="student-form-tab-label-0"
+                            aria-controls="student-form-tab-0"
+                            sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
+                        />
+                        <Tab
+                            label={ui.adminStudents.dialogTabContactMemo}
+                            id="student-form-tab-label-1"
+                            aria-controls="student-form-tab-1"
+                            sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
+                        />
+                        <Tab
+                            label={ui.adminStudents.dialogTabBilling}
+                            id="student-form-tab-label-2"
+                            aria-controls="student-form-tab-2"
+                            sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
+                        />
+                        <Tab
+                            label={ui.adminStudents.dialogTabTextbooks}
+                            id="student-form-tab-label-3"
+                            aria-controls="student-form-tab-3"
+                            sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
+                        />
+                        <Tab
+                            label={ui.adminStudents.dialogTabMedia}
+                            id="student-form-tab-label-4"
+                            aria-controls="student-form-tab-4"
+                            sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
+                        />
+                        <Tab
+                            label={ui.adminStudents.dialogTabConsultations}
+                            id="student-form-tab-label-5"
+                            aria-controls="student-form-tab-5"
+                            sx={{ minHeight: MIN_TOUCH_TARGET_PX }}
+                        />
+                    </Tabs>
+                )}
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} {...tabPanelProps(0)} hidden={tab !== 0}>
                     {tab === 0 ? (
@@ -278,21 +312,25 @@ export const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
             </DialogContent>
             <DialogActions
                 sx={{
-                    flexDirection: { xs: 'column-reverse', sm: 'row' },
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    justifyContent: 'flex-end',
                     gap: 1,
                     px: { xs: 2, sm: 3 },
                     pb: { xs: 2, sm: 2 },
                     pt: 1,
                     '& .MuiButton-root': {
-                        width: { xs: '100%', sm: 'auto' },
+                        flex: '0 0 auto',
+                        width: 'auto',
                         minHeight: MIN_TOUCH_TARGET_PX,
+                        minWidth: MIN_TOUCH_TARGET_PX,
                     },
                 }}
             >
-                <Button onClick={onClose} sx={isSmUp ? touchButtonSx : undefined}>
+                <Button onClick={onClose} sx={touchButtonSx}>
                     {ui.common.cancel}
                 </Button>
-                <Button variant="contained" onClick={onSave} sx={isSmUp ? touchButtonSx : undefined}>
+                <Button variant="contained" onClick={onSave} sx={touchButtonSx}>
                     {ui.common.save}
                 </Button>
             </DialogActions>

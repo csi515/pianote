@@ -1,13 +1,12 @@
 import { lazy, Suspense, useLayoutEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
-import { MOBILE_BOTTOM_NAV_INNER_HEIGHT_PX } from '@/constants/layout';
+import { MOBILE_MAIN_BOTTOM_PADDING } from '@/constants/layout';
 import { PageTopBarProvider } from '@/contexts/PageTopBarContext';
-import { MobileSidebarProvider } from '@/contexts/MobileSidebarContext';
 import { ROUTES } from '@/constants/routes';
 import { protectedRouteDefs } from '@/app/appRouteConfig';
 import { PlatformAdminRoute } from '@/components/auth/PlatformAdminRoute';
@@ -42,9 +41,6 @@ function RouteFallback() {
 export function AppRoutes() {
     const location = useLocation();
     const navigate = useNavigate();
-    const theme = useTheme();
-    const isPhone = useMediaQuery(theme.breakpoints.down('sm'));
-
     useLayoutEffect(() => {
         if (!isStandalonePwa()) return;
         if (location.pathname !== ROUTES.landing) return;
@@ -60,7 +56,6 @@ export function AppRoutes() {
         location.pathname !== ROUTES.auth.resetPassword;
 
     return (
-        <MobileSidebarProvider>
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default', minWidth: 0 }}>
             {showLayout && <Sidebar />}
             <PageTopBarProvider>
@@ -70,16 +65,16 @@ export function AppRoutes() {
                     flexGrow: 1,
                     minWidth: 0,
                     overflowX: 'hidden',
-                    p: showLayout ? { xs: 2, sm: 2.5, md: 3, lg: 3.5 } : 0,
+                    /* xs: 좌우는 MuiContainer(테마)만; 상하는 유지 */
+                    px: showLayout ? { xs: 0, sm: 2.5, md: 3, lg: 3.5 } : 0,
+                    pt: showLayout ? { xs: 2, sm: 2.5, md: 3, lg: 3.5 } : 0,
+                    /* md 미만: BottomNav 높이; md 이상: Drawer만(사이드바 폭은 flex 형제로 확보) */
                     pb: showLayout
-                        ? isPhone
-                            ? `calc(${MOBILE_BOTTOM_NAV_INNER_HEIGHT_PX}px + env(safe-area-inset-bottom))`
-                            : {
-                                  xs: 'max(16px, env(safe-area-inset-bottom))',
-                                  sm: 2.5,
-                                  md: 3,
-                                  lg: 3.5,
-                              }
+                        ? {
+                              xs: MOBILE_MAIN_BOTTOM_PADDING,
+                              md: 2.5,
+                              lg: 3.5,
+                          }
                         : 0,
                     transition: 'all 0.3s',
                 }}
@@ -124,6 +119,5 @@ export function AppRoutes() {
             </PageTopBarProvider>
             {showLayout && <MobileBottomNav />}
         </Box>
-        </MobileSidebarProvider>
     );
 }

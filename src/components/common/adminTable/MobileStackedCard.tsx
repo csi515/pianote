@@ -14,15 +14,34 @@ export type MobileStackedCardProps = {
  */
 export function MobileStackedCard ({ children, actions, sx }: MobileStackedCardProps) {
     return (
-        <Card variant="outlined" sx={{ width: '100%', overflow: 'hidden', ...sx }}>
-            <CardContent sx={{ pb: 1, '&:last-child': { pb: 1 } }}>{children}</CardContent>
+        <Card
+            variant="outlined"
+            sx={[
+                (theme) => ({
+                    width: '100%',
+                    overflow: 'hidden',
+                    borderRadius: { xs: 0, sm: `${theme.shape.borderRadius}px` },
+                }),
+                ...(sx ? (Array.isArray(sx) ? sx : [sx]) : []),
+            ]}
+        >
+            <CardContent
+                sx={{
+                    px: { xs: 1.5, sm: 2 },
+                    pt: { xs: 1.5, sm: 2 },
+                    pb: 1,
+                    '&:last-child': { pb: 1 },
+                }}
+            >
+                {children}
+            </CardContent>
             <CardActions
                 sx={{
                     justifyContent: 'flex-end',
                     flexWrap: 'wrap',
                     gap: 0.5,
-                    px: 2,
-                    pb: 2,
+                    px: { xs: 1.5, sm: 2 },
+                    pb: { xs: 1.5, sm: 2 },
                     pt: 0,
                 }}
             >

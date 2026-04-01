@@ -32,7 +32,6 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { TextbookCatalogSortableItem } from '@/components/admin/textbooks/TextbookCatalogSortableItem';
-import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTopBar } from '@/contexts/PageTopBarContext';
 import { useSnackbar } from 'notistack';
@@ -52,7 +51,7 @@ type TextbookRow = Database['public']['Tables']['textbooks']['Row'];
 const TextbooksCatalogPage: React.FC = () => {
     const catalogDialogTitleId = useId();
     const { academy } = useAuth();
-    usePageTopBar({ title: ui.adminTextbooks.catalogTitle, backTo: ROUTES.admin.dashboard });
+    usePageTopBar({ title: ui.adminTextbooks.catalogTitle });
     const { enqueueSnackbar } = useSnackbar();
     const [rows, setRows] = useState<TextbookRow[]>([]);
     const [loading, setLoading] = useState(true);
@@ -227,14 +226,6 @@ const TextbooksCatalogPage: React.FC = () => {
                     {ui.adminTextbooks.add}
                 </Button>
             </Box>
-            <Paper variant="outlined" sx={{ p: 2, mb: 2 }} role="status">
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    {ui.adminTextbooks.catalogHint}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                    {ui.adminTextbooks.dndHint}
-                </Typography>
-            </Paper>
 
             {loading ? (
                 <Box
@@ -304,7 +295,7 @@ const TextbooksCatalogPage: React.FC = () => {
                         rowsPerPageOptions={[5, 10, 25, 50]}
                         labelRowsPerPage={ui.pagination.labelRowsPerPage}
                         labelDisplayedRows={({ from, to, count }) =>
-                            count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                            count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                         }
                         sx={tablePaginationTouchSx}
                     />

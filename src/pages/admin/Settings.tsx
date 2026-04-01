@@ -14,7 +14,6 @@ import {
     Tab,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
-import { ROUTES } from '@/constants/routes';
 import { usePageTopBar } from '@/contexts/PageTopBarContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -24,7 +23,6 @@ import {
     type AdminNotificationPrefs,
 } from '@/lib/notificationPreferences';
 import { ui } from '@/i18n/ui';
-import { FALLBACK_MONTHLY_FEE_AMOUNT } from '@/services/payments.service';
 import { MIN_TOUCH_TARGET_PX } from '@/constants/touch';
 import { SettingsPasswordTab } from '@/pages/admin/SettingsPasswordTab';
 
@@ -40,7 +38,7 @@ function tabPanelProps (index: number) {
 }
 
 const Settings: React.FC = () => {
-    usePageTopBar({ title: s.pageTitle, backTo: ROUTES.admin.dashboard });
+    usePageTopBar({ title: s.pageTitle });
     const { user, profile, academy, refreshUserProfile } = useAuth();
     const [tab, setTab] = useState(0);
     const [notifPrefs, setNotifPrefs] = useState<AdminNotificationPrefs>(() => loadAdminNotificationPrefs());
@@ -181,11 +179,7 @@ const Settings: React.FC = () => {
 
     return (
         <Container maxWidth="md" sx={{ py: { xs: 3, sm: 4 } }}>
-            <Paper sx={{ p: 4, borderRadius: 2 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    {s.settingsHint}
-                </Typography>
-
+            <Paper sx={{ p: { xs: 2, sm: 4 }, borderRadius: 2 }}>
                 {message ? (
                     <Alert severity={message.type} sx={{ mb: 3 }}>
                         {message.text}
@@ -239,9 +233,6 @@ const Settings: React.FC = () => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} {...tabPanelProps(0)} hidden={tab !== 0}>
                     {tab === 0 ? (
                         <>
-                            <Typography variant="body2" color="text.secondary">
-                                {s.profileSectionHint}
-                            </Typography>
                             <Box component="form" noValidate autoComplete="off" onSubmit={(e) => e.preventDefault()}>
                                 <TextField
                                     fullWidth
@@ -287,9 +278,6 @@ const Settings: React.FC = () => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} {...tabPanelProps(1)} hidden={tab !== 1}>
                     {tab === 1 ? (
                         <>
-                            <Typography variant="body2" color="text.secondary">
-                                {s.defaultMonthlyFeeHint}
-                            </Typography>
                             {academy?.default_monthly_fee != null ? (
                                 <Typography variant="body1" fontWeight={600}>
                                     {s.defaultMonthlyFeeCurrentLine.replace(
@@ -298,17 +286,9 @@ const Settings: React.FC = () => {
                                     )}
                                 </Typography>
                             ) : (
-                                <Box>
-                                    <Typography variant="body1" fontWeight={600} sx={{ mb: 0.5 }}>
-                                        {s.defaultMonthlyFeeNotSavedLine}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {s.defaultMonthlyFeeSystemFallbackNote.replace(
-                                            '{amount}',
-                                            FALLBACK_MONTHLY_FEE_AMOUNT.toLocaleString('ko-KR')
-                                        )}
-                                    </Typography>
-                                </Box>
+                                <Typography variant="body1" fontWeight={600}>
+                                    {s.defaultMonthlyFeeNotSavedLine}
+                                </Typography>
                             )}
                             <TextField
                                 fullWidth
@@ -334,9 +314,6 @@ const Settings: React.FC = () => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} {...tabPanelProps(2)} hidden={tab !== 2}>
                     {tab === 2 ? (
                         <>
-                            <Typography variant="body2" color="text.secondary">
-                                {s.notificationHint}
-                            </Typography>
                             <FormGroup>
                                 <FormControlLabel
                                     control={

@@ -10,7 +10,7 @@ export type MobileCardListProps = {
 /**
  * 모바일 카드 목록 래퍼 — 접근성 `role="list"`, 자식은 `MobileCardListItem`으로 감쌀 것
  */
-export function MobileCardList ({ children, spacing = 2, sx }: MobileCardListProps) {
+export function MobileCardList ({ children, spacing = 1.5, sx }: MobileCardListProps) {
     return (
         <Stack
             component="ul"

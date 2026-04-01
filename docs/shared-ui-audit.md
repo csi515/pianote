@@ -6,7 +6,7 @@
 
 | 구분 | 파일 | 현재 패턴 | 권장 |
 |------|------|-----------|------|
-| 대시보드 | `src/pages/admin/Dashboard.tsx` | 카드 수치 `...` 로딩 | `ui.common.loading` 또는 `AdminPageLoading` 블록 |
+| 대시보드 | `src/pages/admin/Dashboard.tsx` | 카드 수치 로딩 | `ui.common.loading` (적용됨) |
 | 학생 관리 | `StudentManagement.tsx` | `TableLoadingRow`, 스낵바 | 유지 (이미 공통) |
 | 결제 | `PaymentsManagement.tsx`, `MonthlyPaymentsPanel.tsx` | `TableLoadingRow`, 인라인 `Dialog` | `FormDialog`로 치환 가능 |
 | 커리큘럼 | `CurriculumProgress.tsx` | `CircularProgress` 단독 | `AdminPageLoading` |
@@ -33,3 +33,18 @@
 - 문구: `src/i18n/ui.ts` — `common.*` 페이지 상태·취소·저장 등
 
 자세한 템플릿은 [UX.md](./UX.md)의 「관리자 화면 템플릿」을 참고합니다.
+
+## 반응형 네비·목록 (갱신)
+
+글로벌 네비(`Sidebar` / `MobileBottomNav`)와 **목록 카드 vs 테이블** 전환은 MUI **`md`** 기준으로 맞춥니다. 요약은 [UX.md](./UX.md)의 「반응형 네비·목록」을 따릅니다.
+
+**태블릿:** [UX.md](./UX.md) 「태블릿·창 크기 정책」— 현재는 **900px(`md`) 미만**을 모바일 레이아웃으로 통일. **넓은 테이블**은 `tableContainerTouchScrollSx`로 가로 스크롤·터치 스크롤을 통일함.
+
+**데스크톱:** [UX.md](./UX.md) 「데스크톱·넓은 화면」— 좁은 PC 창·초광역 여백·키보드 등은 아래 백로그로 관리한다.
+
+## 데스크톱 UX 백로그 (선택)
+
+- **초광역:** 데이터 집약 **특정 목록 페이지만** `Container` `maxWidth` 완화 여부 — **제품 결정** 후(전 페이지 일괄 확장 비권장).
+- **좁은 고해상도 창:** 표 **열 우선순위**·브레이크포인트별 열 숨김 — 화면별.
+- **키보드:** 목록 검색 포커스·단축키 등 — 요구 수집 후.
+- **대시보드:** `xl` 구간 추가 카드·지표 — 콘텐츠 기획 후.

@@ -51,7 +51,12 @@ import {
     MobileCardListItem,
     MobileStackedCard,
 } from '@/components/common/adminTable';
-import { tablePaginationTouchSx, touchButtonSx, touchIconButtonSx } from '@/constants/touch';
+import {
+    tableContainerTouchScrollSx,
+    tablePaginationTouchSx,
+    touchButtonSx,
+    touchIconButtonSx,
+} from '@/constants/touch';
 import { PaymentPaidDateCell } from '@/pages/admin/payments/PaymentPaidDateCell';
 
 type PayStatus = Database['public']['Tables']['payments']['Row']['status'];
@@ -88,7 +93,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
 }) => {
     const monthlyDialogTitleId = useId();
     const theme = useTheme();
-    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobileList = useMediaQuery(theme.breakpoints.down('md'));
 
     const { enqueueSnackbar } = useSnackbar();
     const [togglingPaymentId, setTogglingPaymentId] = useState<string | null>(null);
@@ -216,9 +221,6 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
 
     return (
         <>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {ui.adminPayments.monthlyHint}
-            </Typography>
             <Stack
                 direction="row"
                 alignItems="center"
@@ -279,8 +281,8 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                 </IconButton>
             </Stack>
             {isMobileList ? (
-                <Paper variant="outlined">
-                    <Box sx={{ p: 2 }}>
+                <Paper variant="outlined" sx={{ borderRadius: { xs: 0, sm: 1 }, overflow: 'hidden' }}>
+                    <Box sx={{ px: { xs: 0, sm: 2 }, py: { xs: 0, sm: 2 } }}>
                         {loading ? (
                             <Typography color="text.secondary" textAlign="center" py={3}>
                                 {ui.common.loading}
@@ -385,14 +387,14 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                             rowsPerPageOptions={[5, 10, 25, 50]}
                             labelRowsPerPage={ui.pagination.labelRowsPerPage}
                             labelDisplayedRows={({ from, to, count }) =>
-                                count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                             }
                             sx={tablePaginationTouchSx}
                         />
                     ) : null}
                 </Paper>
             ) : (
-                <TableContainer component={Paper} variant="outlined">
+                <TableContainer component={Paper} variant="outlined" sx={tableContainerTouchScrollSx}>
                     <Table size="small" aria-label={ui.adminPayments.tableAriaLabelMonthly}>
                         <TableHead>
                             <TableRow>
@@ -501,7 +503,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                             rowsPerPageOptions={[5, 10, 25, 50]}
                             labelRowsPerPage={ui.pagination.labelRowsPerPage}
                             labelDisplayedRows={({ from, to, count }) =>
-                                count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                             }
                             sx={tablePaginationTouchSx}
                         />

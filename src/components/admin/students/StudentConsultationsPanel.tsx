@@ -12,7 +12,6 @@ import {
     TableRow,
     TablePagination,
     TextField,
-    Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -28,7 +27,12 @@ import visuallyHidden from '@mui/utils/visuallyHidden';
 import { ui } from '@/i18n/ui';
 import FormDialog from '@/components/common/FormDialog';
 import { TableEmptyRow, TableLoadingRow } from '@/components/common/PageState';
-import { MIN_TOUCH_TARGET_PX, tablePaginationTouchSx, touchIconButtonSx } from '@/constants/touch';
+import {
+    MIN_TOUCH_TARGET_PX,
+    tableContainerTouchScrollSx,
+    tablePaginationTouchSx,
+    touchIconButtonSx,
+} from '@/constants/touch';
 
 export type StudentConsultationsPanelProps = {
     studentId: string;
@@ -139,10 +143,7 @@ export const StudentConsultationsPanel: React.FC<StudentConsultationsPanelProps>
                     {ui.adminConsultations.add}
                 </Button>
             </Box>
-            <Typography variant="body2" color="text.secondary">
-                {ui.adminConsultations.studentPanelHint}
-            </Typography>
-            <TableContainer component={Paper} variant="outlined">
+            <TableContainer component={Paper} variant="outlined" sx={tableContainerTouchScrollSx}>
                 <Table size="small" aria-label={ui.adminConsultations.studentTableAriaLabel}>
                     <TableHead>
                         <TableRow>
@@ -195,7 +196,7 @@ export const StudentConsultationsPanel: React.FC<StudentConsultationsPanelProps>
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     labelRowsPerPage={ui.pagination.labelRowsPerPage}
                     labelDisplayedRows={({ from, to, count }) =>
-                        count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                        count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                     }
                     sx={tablePaginationTouchSx}
                 />

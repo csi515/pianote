@@ -275,7 +275,6 @@ export const ui = {
         statTextbookFeeUnpaidHint: '보유 교재 중 납부 처리되지 않은 건이 있는 활성 학생',
         countUnit: '명',
         countUnitCases: '건',
-        loadingEllipsis: '...',
     },
     adminPayments: {
         title: '결제 관리',
@@ -431,8 +430,6 @@ export const ui = {
         tableColMemo: '특징·메모',
         tableColParent: '보호자 연락처',
         tableColEnrollment: '등록일',
-        tableColLeftAcademy: '퇴원일',
-        tableColStatus: '상태',
         tableColTextbookFee: '교재비',
         tableColTextbookFeeHint:
             '대시보드·상단 알림과 동일: 활성 학생만 미납·완납 집계. 비활성 행은 —.',
@@ -447,6 +444,8 @@ export const ui = {
         textbookFeeStatusAriaPaid: '교재비 완납',
         textbookFeeStatusAriaUnpaid: '교재비 미납',
         dialogTabsAriaLabel: '학생 정보 입력 구역',
+        /** md 미만에서 탭 대신 Select로 구역 선택 */
+        dialogSectionSelectLabel: '입력 구역',
         editAria: '수정',
         deleteAria: '삭제',
         chipActive: '활성',

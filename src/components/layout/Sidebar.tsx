@@ -18,7 +18,6 @@ import { alpha } from '@mui/material/styles';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ui } from '@/i18n/ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMobileSidebar } from '@/contexts/MobileSidebarContext';
 import { ADMIN_DRAWER_WIDTH } from '@/constants/layout';
 import { MIN_TOUCH_TARGET_PX } from '@/constants/touch';
 import { ROUTES } from '@/constants/routes';
@@ -35,8 +34,7 @@ type NavModel =
 
 const Sidebar: React.FC = () => {
     const theme = useTheme();
-    const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
-    const { mobileOpen, setMobileOpen, closeMobileSidebar } = useMobileSidebar();
+    const isMdUp = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
     const navigate = useNavigate();
     const location = useLocation();
     const { signOut } = useAuth();
@@ -59,7 +57,6 @@ const Sidebar: React.FC = () => {
 
     const go = (path: string) => {
         navigate(path);
-        if (!isMdUp) closeMobileSidebar();
     };
 
     const renderItem = (item: SidebarNavItem) => (
@@ -88,24 +85,23 @@ const Sidebar: React.FC = () => {
         </ListItem>
     );
 
+    /** md 미만은 BottomNavigation만 사용 — Drawer·햄버거 제거 */
+    if (!isMdUp) return null;
+
     return (
         <Drawer
-            variant={isMdUp ? 'permanent' : 'temporary'}
-            open={isMdUp || mobileOpen}
-            onClose={() => setMobileOpen(false)}
-            ModalProps={{ keepMounted: true }}
+            variant="permanent"
             sx={{
-                width: { md: ADMIN_DRAWER_WIDTH },
-                flexShrink: { md: 0 },
+                width: ADMIN_DRAWER_WIDTH,
+                flexShrink: 0,
                 [`& .MuiDrawer-paper`]: {
-                    width: { xs: 'min(280px, 92vw)', md: ADMIN_DRAWER_WIDTH },
+                    width: ADMIN_DRAWER_WIDTH,
                     maxWidth: '100%',
                     boxSizing: 'border-box',
                     borderRight: '1px solid',
                     borderColor: (t) => alpha(t.palette.primary.main, 0.1),
                     background: (t) =>
                         `linear-gradient(180deg, ${alpha(t.palette.primary.main, 0.04)} 0%, ${t.palette.background.paper} 28%)`,
-                    paddingBottom: { xs: 'max(12px, env(safe-area-inset-bottom))', md: 0 },
                 },
             }}
         >
@@ -159,7 +155,6 @@ const Sidebar: React.FC = () => {
                         variant="text"
                         color="inherit"
                         onClick={() => {
-                            closeMobileSidebar();
                             void handleLogout();
                         }}
                         startIcon={<LogoutIcon sx={{ fontSize: 18 }} />}

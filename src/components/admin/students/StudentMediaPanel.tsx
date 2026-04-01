@@ -16,7 +16,6 @@ import {
     TableRow,
     TablePagination,
     TextField,
-    Typography,
     useMediaQuery,
     useTheme,
 } from '@mui/material';
@@ -32,7 +31,13 @@ import {
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import { ui } from '@/i18n/ui';
 import { TableEmptyRow, TableLoadingRow } from '@/components/common/PageState';
-import { MIN_TOUCH_TARGET_PX, tablePaginationTouchSx, touchButtonSx, touchIconButtonSx } from '@/constants/touch';
+import {
+    MIN_TOUCH_TARGET_PX,
+    tableContainerTouchScrollSx,
+    tablePaginationTouchSx,
+    touchButtonSx,
+    touchIconButtonSx,
+} from '@/constants/touch';
 
 export type StudentMediaPanelProps = {
     studentId: string;
@@ -135,10 +140,7 @@ export const StudentMediaPanel: React.FC<StudentMediaPanelProps> = ({ studentId 
                     {ui.adminMedia.add}
                 </Button>
             </Box>
-            <Typography variant="body2" color="text.secondary">
-                {ui.adminMedia.studentPanelHint}
-            </Typography>
-            <TableContainer component={Paper} variant="outlined">
+            <TableContainer component={Paper} variant="outlined" sx={tableContainerTouchScrollSx}>
                 <Table size="small" aria-label={ui.adminMedia.studentTableAriaLabel}>
                     <TableHead>
                         <TableRow>
@@ -213,7 +215,7 @@ export const StudentMediaPanel: React.FC<StudentMediaPanelProps> = ({ studentId 
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     labelRowsPerPage={ui.pagination.labelRowsPerPage}
                     labelDisplayedRows={({ from, to, count }) =>
-                        count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                        count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                     }
                     sx={tablePaginationTouchSx}
                 />

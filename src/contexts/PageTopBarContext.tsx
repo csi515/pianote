@@ -6,17 +6,12 @@ import React, {
     useMemo,
     useState,
 } from 'react';
-import { ROUTES } from '@/constants/routes';
-
 export type PageTopBarState = {
     title: string | null;
-    /** null이면 뒤로가기 버튼 숨김 */
-    backTo: string | null;
 };
 
 const defaultState: PageTopBarState = {
     title: null,
-    backTo: null,
 };
 
 type PageTopBarContextValue = PageTopBarState & {
@@ -48,20 +43,17 @@ export function usePageTopBarContextOptional() {
 }
 
 /**
- * 하위 화면에서 호출: 전역 TopBar에 페이지 제목·뒤로가기 경로 설정. 언마운트 시 초기화.
+ * 하위 화면에서 호출: 전역 TopBar에 페이지 제목 설정. 언마운트 시 초기화.
  */
-export function usePageTopBar(config: { title: string; backTo?: string | null }) {
+export function usePageTopBar(config: { title: string }) {
     const ctx = useContext(PageTopBarContext);
     const setPageTopBar = ctx?.setPageTopBar;
     const resetPageTopBar = ctx?.resetPageTopBar;
 
     useEffect(() => {
         if (!setPageTopBar || !resetPageTopBar) return;
-        setPageTopBar({
-            title: config.title,
-            backTo: config.backTo === undefined ? ROUTES.admin.dashboard : config.backTo,
-        });
+        setPageTopBar({ title: config.title });
         return () => resetPageTopBar();
         // ctx 전체를 넣으면 state 갱신마다 value 참조가 바뀌어 무한 루프가 난다. setter만 의존한다.
-    }, [setPageTopBar, resetPageTopBar, config.title, config.backTo]);
+    }, [setPageTopBar, resetPageTopBar, config.title]);
 }

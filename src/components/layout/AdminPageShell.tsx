@@ -1,16 +1,11 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Container, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Container, Box } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { ContainerProps } from '@mui/material/Container';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
-import { ui } from '@/i18n/ui';
 import { MIN_TOUCH_TARGET_PX } from '@/constants/touch';
 
 export type AdminPageShellProps = {
     title: React.ReactNode;
-    /** 지정 시 상단에 뒤로가기(해당 경로로 이동). 생략 시 버튼 없음(대시보드 등) */
-    backTo?: string;
     children: React.ReactNode;
     /** 툴바 오른쪽(추가 버튼 등) */
     actions?: React.ReactNode;
@@ -28,7 +23,6 @@ export type AdminPageShellProps = {
  */
 const AdminPageShell: React.FC<AdminPageShellProps> = ({
     title,
-    backTo,
     children,
     actions,
     maxWidth = 'lg',
@@ -38,9 +32,6 @@ const AdminPageShell: React.FC<AdminPageShellProps> = ({
     appBarSx,
     borderBottom = false,
 }) => {
-    const navigate = useNavigate();
-    const showBack = Boolean(backTo);
-
     return (
         <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
             <AppBar
@@ -61,17 +52,6 @@ const AdminPageShell: React.FC<AdminPageShellProps> = ({
                         alignItems: 'center',
                     }}
                 >
-                    {showBack && (
-                        <IconButton
-                            edge="start"
-                            color="inherit"
-                            onClick={() => navigate(backTo!)}
-                            aria-label={ui.layout.backAria}
-                            sx={{ minWidth: 44, minHeight: 44, flexShrink: 0 }}
-                        >
-                            <ArrowBackIcon />
-                        </IconButton>
-                    )}
                     <Typography
                         variant="h6"
                         component="div"

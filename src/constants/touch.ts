@@ -15,6 +15,13 @@ export const touchIconButtonSx: SxProps<Theme> = {
     minHeight: MIN_TOUCH_TARGET_PX,
 };
 
+/** 가로 넓은 테이블 — 태블릿·터치에서 스크롤(열 많을 때) */
+export const tableContainerTouchScrollSx: SxProps<Theme> = {
+    width: '100%',
+    overflowX: 'auto',
+    WebkitOverflowScrolling: 'touch',
+};
+
 /** TablePagination 툴바·셀렉트·이전·다음 버튼 터치 영역 */
 export const tablePaginationTouchSx: SxProps<Theme> = {
     borderTop: 1,

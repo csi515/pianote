@@ -21,12 +21,10 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Alert,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '@/contexts/AuthContext';
 import { ui } from '@/i18n/ui';
-import { ROUTES } from '@/constants/routes';
 import { usePageTopBar } from '@/contexts/PageTopBarContext';
 import {
     appointBranchAdmin,
@@ -36,11 +34,12 @@ import {
     type AcademyRow,
     type BranchAdminRow,
 } from '@/services/platformAdmin.service';
+import { tableContainerTouchScrollSx } from '@/constants/touch';
 
 const BranchAdminsPage: React.FC = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { profile } = useAuth();
-    usePageTopBar({ title: ui.platformBranchAdmins.title, backTo: ROUTES.admin.dashboard });
+    usePageTopBar({ title: ui.platformBranchAdmins.title });
 
     const [academies, setAcademies] = useState<AcademyRow[]>([]);
     const [academyId, setAcademyId] = useState<string>('');
@@ -128,10 +127,6 @@ const BranchAdminsPage: React.FC = () => {
 
     return (
         <Container maxWidth="md" sx={{ mt: { xs: 1, sm: 2 }, py: { xs: 1, sm: 2 } }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {ui.platformBranchAdmins.subtitle}
-                </Typography>
-
                 <Paper sx={{ p: 2, mb: 2 }}>
                     <FormControl fullWidth size="small">
                         <InputLabel id="branch-select-label">{ui.platformBranchAdmins.selectBranch}</InputLabel>
@@ -154,9 +149,6 @@ const BranchAdminsPage: React.FC = () => {
                     <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                         {ui.platformBranchAdmins.appointSection}
                     </Typography>
-                    <Alert severity="info" sx={{ mb: 2 }}>
-                        {ui.platformBranchAdmins.appointHint}
-                    </Alert>
                     <Box
                         sx={{
                             display: 'flex',
@@ -186,7 +178,7 @@ const BranchAdminsPage: React.FC = () => {
                 </Paper>
 
                 <Paper sx={{ p: { xs: 1, sm: 2 } }}>
-                    <TableContainer sx={{ overflowX: 'auto' }}>
+                    <TableContainer sx={tableContainerTouchScrollSx}>
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
@@ -245,7 +237,7 @@ const BranchAdminsPage: React.FC = () => {
                                 rowsPerPageOptions={[5, 10, 25]}
                                 labelRowsPerPage={ui.pagination.labelRowsPerPage}
                                 labelDisplayedRows={({ from, to, count }) =>
-                                    count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                    count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                                 }
                             />
                         ) : null}

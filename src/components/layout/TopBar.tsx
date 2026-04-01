@@ -9,16 +9,11 @@ import {
     Badge,
     Popover,
     Button,
-    useMediaQuery,
-    useTheme,
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageTopBarContextOptional } from '@/contexts/PageTopBarContext';
-import { useMobileSidebar } from '@/contexts/MobileSidebarContext';
 import { ui } from '@/i18n/ui';
 import { ROUTES } from '@/constants/routes';
 import { MIN_TOUCH_TARGET_PX } from '@/constants/touch';
@@ -30,9 +25,6 @@ import {
 } from '@/lib/notificationPreferences';
 
 const TopBar: React.FC = () => {
-    const theme = useTheme();
-    const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
-    const { setMobileOpen } = useMobileSidebar();
     const { profile, academy } = useAuth();
     const navigate = useNavigate();
     const pageTop = usePageTopBarContextOptional();
@@ -83,7 +75,6 @@ const TopBar: React.FC = () => {
     const open = Boolean(anchorEl);
 
     const pageTitle = pageTop?.title ?? null;
-    const backTo = pageTop?.backTo ?? null;
 
     return (
         <AppBar
@@ -106,56 +97,6 @@ const TopBar: React.FC = () => {
                     flexWrap: 'nowrap',
                 }}
             >
-                {!isMdUp ? (
-                    <IconButton
-                        edge="start"
-                        onClick={() => setMobileOpen(true)}
-                        aria-label={ui.layout.openMenuAria}
-                        sx={(t) => ({
-                            minWidth: MIN_TOUCH_TARGET_PX,
-                            minHeight: MIN_TOUCH_TARGET_PX,
-                            flexShrink: 0,
-                            color: t.palette.primary.main,
-                            bgcolor: 'transparent',
-                            '&:hover': {
-                                bgcolor: 'transparent',
-                                color: t.palette.primary.dark,
-                            },
-                            '&:focus-visible': {
-                                bgcolor: 'transparent',
-                                outline: `2px solid ${t.palette.primary.main}`,
-                                outlineOffset: 2,
-                            },
-                        })}
-                    >
-                        <MenuIcon fontSize="medium" />
-                    </IconButton>
-                ) : null}
-                {backTo ? (
-                    <IconButton
-                        edge={isMdUp ? 'start' : undefined}
-                        onClick={() => navigate(backTo)}
-                        aria-label={ui.layout.backAria}
-                        sx={(t) => ({
-                            minWidth: MIN_TOUCH_TARGET_PX,
-                            minHeight: MIN_TOUCH_TARGET_PX,
-                            flexShrink: 0,
-                            color: t.palette.primary.main,
-                            bgcolor: 'transparent',
-                            '&:hover': {
-                                bgcolor: 'transparent',
-                                color: t.palette.primary.dark,
-                            },
-                            '&:focus-visible': {
-                                bgcolor: 'transparent',
-                                outline: `2px solid ${t.palette.primary.main}`,
-                                outlineOffset: 2,
-                            },
-                        })}
-                    >
-                        <ArrowBackIcon fontSize="medium" />
-                    </IconButton>
-                ) : null}
                 <Box flexGrow={1} minWidth={0} sx={{ overflow: 'hidden' }}>
                     {pageTitle ? (
                         <>

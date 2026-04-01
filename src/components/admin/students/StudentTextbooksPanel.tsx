@@ -37,7 +37,7 @@ import {
     MobileCardListItem,
     MobileStackedCard,
 } from '@/components/common/adminTable';
-import { tablePaginationTouchSx, touchButtonSx } from '@/constants/touch';
+import { tableContainerTouchScrollSx, tablePaginationTouchSx, touchButtonSx } from '@/constants/touch';
 
 type TextbookRow = Database['public']['Tables']['textbooks']['Row'];
 
@@ -78,7 +78,7 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const theme = useTheme();
-    const isMobileList = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobileList = useMediaQuery(theme.breakpoints.down('md'));
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -179,11 +179,8 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
 
     return (
         <Box>
-            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2 }}>
                 {ui.adminTextbooks.panelTitle}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {ui.adminTextbooks.panelShortHint}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, alignItems: 'center' }}>
                 <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
@@ -213,8 +210,8 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
             </Box>
 
             {isMobileList ? (
-                <Paper variant="outlined">
-                    <Box sx={{ p: 2 }}>
+                <Paper variant="outlined" sx={{ borderRadius: { xs: 0, sm: 1 }, overflow: 'hidden' }}>
+                    <Box sx={{ px: { xs: 0, sm: 2 }, py: { xs: 0, sm: 2 } }}>
                         {loading ? (
                             <Typography color="text.secondary" textAlign="center" py={3}>
                                 {ui.common.loading}
@@ -297,14 +294,14 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
                             rowsPerPageOptions={[5, 10, 25]}
                             labelRowsPerPage={ui.pagination.labelRowsPerPage}
                             labelDisplayedRows={({ from, to, count }) =>
-                                count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                             }
                             sx={tablePaginationTouchSx}
                         />
                     ) : null}
                 </Paper>
             ) : (
-                <TableContainer>
+                <TableContainer sx={tableContainerTouchScrollSx}>
                     <Table size="small" aria-label={ui.adminTextbooks.assignmentsTableAriaLabel}>
                         <TableHead>
                             <TableRow>
@@ -391,7 +388,7 @@ export const StudentTextbooksPanel: React.FC<StudentTextbooksPanelProps> = ({
                             rowsPerPageOptions={[5, 10, 25]}
                             labelRowsPerPage={ui.pagination.labelRowsPerPage}
                             labelDisplayedRows={({ from, to, count }) =>
-                                count === 0 ? '0 / 0' : `${from + 1}-${to + 1} / ${count}`
+                                count === 0 ? '0 / 0' : `${from}-${to} / ${count}`
                             }
                             sx={tablePaginationTouchSx}
                         />
