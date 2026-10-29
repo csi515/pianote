@@ -102,6 +102,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
     const { enqueueSnackbar } = useSnackbar();
     const [togglingPaymentId, setTogglingPaymentId] = useState<string | null>(null);
     const [monthlyDialogOpen, setMonthlyDialogOpen] = useState(false);
+    const [paymentFilter, setPaymentFilter] = useState<'all' | 'unpaid'>('all');
     const [monthlyForm, setMonthlyForm] = useState({
         student_id: '',
         amount: '',
@@ -122,6 +123,17 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
         [students]
     );
 
+    const filteredStudents = useMemo(() => {
+        if (paymentFilter === 'all') {
+            return sortedActiveStudents;
+        }
+        return sortedActiveStudents.filter((s) => {
+            const payment = paymentByStudentId.get(s.id);
+            if (!payment) return true;
+            return payment.status !== 'paid';
+        });
+    }, [sortedActiveStudents, paymentFilter, paymentByStudentId]);
+
     const [tablePage, setTablePage] = useState(0);
     const [tableRowsPerPage, setTableRowsPerPage] = useState(10);
 
@@ -129,7 +141,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
         setTablePage(0);
     }, [billingMonthInput]);
 
-    const totalStudents = sortedActiveStudents.length;
+    const totalStudents = filteredStudents.length;
     useEffect(() => {
         setTablePage((p) => {
             const maxP =
@@ -140,8 +152,8 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
 
     const pagedStudents = useMemo(() => {
         const start = tablePage * tableRowsPerPage;
-        return sortedActiveStudents.slice(start, start + tableRowsPerPage);
-    }, [sortedActiveStudents, tablePage, tableRowsPerPage]);
+        return filteredStudents.slice(start, start + tableRowsPerPage);
+    }, [filteredStudents, tablePage, tableRowsPerPage]);
 
     const { year: billingYear, month: billingMonthNum } = useMemo(
         () => parseYearMonth(billingMonthInput),
@@ -338,6 +350,22 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                 >
                     <ChevronRightIcon />
                 </IconButton>
+                <Box sx={{ width: { xs: '100%', sm: 'auto' }, ml: { xs: 0, sm: 2 } }} />
+                <FormControl size="small" sx={{ minWidth: { xs: 120, sm: 128 } }}>
+                    <InputLabel id="payment-filter-label">{ui.adminPayments.filterLabel}</InputLabel>
+                    <Select
+                        labelId="payment-filter-label"
+                        label={ui.adminPayments.filterLabel}
+                        value={paymentFilter}
+                        onChange={(e) => {
+                            setPaymentFilter(e.target.value as 'all' | 'unpaid');
+                            setTablePage(0);
+                        }}
+                    >
+                        <MenuItem value="all">{ui.adminPayments.filterAll}</MenuItem>
+                        <MenuItem value="unpaid">{ui.adminPayments.filterUnpaid}</MenuItem>
+                    </Select>
+                </FormControl>
             </Stack>
             {isMobileList ? (
                 <Paper variant="outlined" sx={{ borderRadius: { xs: 0, sm: 1 }, overflow: 'hidden' }}>
@@ -349,6 +377,10 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                         ) : sortedActiveStudents.length === 0 ? (
                             <Typography color="text.secondary" textAlign="center" py={3}>
                                 {ui.adminPayments.emptyActiveStudents}
+                            </Typography>
+                        ) : filteredStudents.length === 0 ? (
+                            <Typography color="text.secondary" textAlign="center" py={3}>
+                                {ui.adminPayments.emptyFilteredUnpaid}
                             </Typography>
                         ) : (
                             <MobileCardList>
@@ -439,7 +471,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                     {!loading && sortedActiveStudents.length > 0 ? (
                         <TablePagination
                             component="div"
-                            count={sortedActiveStudents.length}
+                            count={filteredStudents.length}
                             page={tablePage}
                             onPageChange={(_, p) => setTablePage(p)}
                             rowsPerPage={tableRowsPerPage}
@@ -474,6 +506,10 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                             ) : sortedActiveStudents.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5}>{ui.adminPayments.emptyActiveStudents}</TableCell>
+                                </TableRow>
+                            ) : filteredStudents.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5}>{ui.adminPayments.emptyFilteredUnpaid}</TableCell>
                                 </TableRow>
                             ) : (
                                 pagedStudents.map((s) => {
@@ -561,7 +597,7 @@ const MonthlyPaymentsPanel: React.FC<MonthlyPaymentsPanelProps> = ({
                     {!loading && sortedActiveStudents.length > 0 ? (
                         <TablePagination
                             component="div"
-                            count={sortedActiveStudents.length}
+                            count={filteredStudents.length}
                             page={tablePage}
                             onPageChange={(_, p) => setTablePage(p)}
                             rowsPerPage={tableRowsPerPage}
